@@ -1,36 +1,51 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# NewsNexusPortal09
 
-## Getting Started
+## Overview
 
-First, run the development server:
+NewsNexus Portal is the web interface for the NewsNexus09Db and microservices suite of applications.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- started from `npx create-next-app@latest`
+  - No Turbopack -> this causes problems with the svg icons (src/icons)
+
+## Project Structure
+
+```
+src/
+  app/
+    (dashboard)/
+      (articles)/
+      (admin-db)/
+      (admin-general)/
+      (reports-analysis)/
+      (user-pages)/
+    (full-width)/
+      (auth)/
+      (error-pages)/
+    layout.tsx
+    globals.css
+  components/
+  store/
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Key differences from version 08
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Layout vs `TemplateView.js`**: In v08 (Pages Router) we used a `TemplateView.js` component to render the top/side navigation across pages. In v09 (App Router), this responsibility moves to `layout.tsx`.
+  - Use `src/app/(dashboard)/layout.tsx` to wrap all dashboard routes with the sidebar/header chrome (this replaces `TemplateView.js`).
+  - Optionally use `src/app/(full-width)/layout.tsx` for auth and other pages that should not include the dashboard chrome.
+- **Route groups don’t affect URLs**: `(dashboard)` and `(full-width)` are organizational; they scope layouts and don’t appear in the path.
+- **Per‑segment routing**: Routes are defined by folders with a `page.tsx`. Shared UI (including what lived in `components/common/`) belongs under `src/components/`.
+- **No `[root_navigator].js` / `[navigator].js`**: Navigation is file‑system based; those dynamic navigator files are no longer needed.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Template Changes
 
-## Learn More
+This version of the News Nexus Portal will heavily leverage the [free-nextjs-admin-dashboard-main](https://tailadmin.com/download) project. The following is a list of modification we I am making from the template.
 
-To learn more about Next.js, take a look at the following resources:
+- SignUpForm.tsx changed to RegistrationForm.tsx
+- SignInForm.tsx changed to LoginForm.tsx
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Imports
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Required for Template
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `npm install tailwind-merge`
+- `npm i -D @svgr/webpack`
