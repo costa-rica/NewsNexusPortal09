@@ -104,6 +104,8 @@ export default function LoginForm() {
 									<div className="relative">
 										<Input
 											type={showPassword ? "text" : "password"}
+											value={password}
+											onChange={(e) => passwordSetter(e.target.value)}
 											placeholder="Enter your password"
 										/>
 										<span

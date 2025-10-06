@@ -4,7 +4,10 @@ import "./globals.css";
 import Providers from "./providers";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { SidebarProvider } from "@/context/SidebarContext";
-
+import { Outfit } from "next/font/google";
+const outfit = Outfit({
+	subsets: ["latin"],
+});
 const geistSans = Geist({
 	variable: "--font-geist-sans",
 	subsets: ["latin"],
@@ -27,9 +30,10 @@ export default function RootLayout({
 }>) {
 	return (
 		<html lang="en">
-			<body
+			{/* <body
 				className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-			>
+			> */}
+			<body className={`${outfit.className} dark:bg-gray-900`}>
 				<Providers>
 					{" "}
 					<ThemeProvider>
