@@ -6,25 +6,67 @@ NewsNexus Portal is the web interface for the NewsNexus09Db and microservices su
 
 - started from `npx create-next-app@latest`
   - No Turbopack -> this causes problems with the svg icons (src/icons)
+- Uses App Router
+- Uses TailwindCSS
+- Uses Redux for state management
+- Uses TypeScript
 
 ## Project Structure
 
 ```
-src/
-  app/
-    (dashboard)/
-      (articles)/
-      (admin-db)/
-      (admin-general)/
-      (reports-analysis)/
-      (user-pages)/
-    (full-width)/
-      (auth)/
-      (error-pages)/
-    layout.tsx
-    globals.css
-  components/
-  store/
+.
+├── eslint.config.mjs
+├── next-env.d.ts
+├── next.config.ts
+├── package-lock.json
+├── package.json
+├── postcss.config.mjs
+├── public
+│   ├── file.svg
+│   ├── globe.svg
+│   ├── images
+│   │   ├── buttons
+│   │   ├── deleteCircleX.svg
+│   │   ├── kmLogo_square1500.png
+│   │   ├── logoAndNameRound.png
+│   │   ├── logoWhiteBackground.png
+│   │   ├── menu
+│   │   └── new.png
+│   ├── next.svg
+│   ├── vercel.svg
+│   └── window.svg
+├── README.md
+├── src
+│   ├── app
+│   │   ├── (dashboard)
+│   │   ├── (full-width)
+│   │   ├── favicon.ico
+│   │   ├── globals.css
+│   │   ├── layout.tsx
+│   │   ├── page.tsx
+│   │   └── providers.tsx
+│   ├── components
+│   │   ├── auth
+│   │   ├── common
+│   │   ├── form
+│   │   ├── header
+│   │   └── ui
+│   ├── context
+│   │   ├── SidebarContext.tsx
+│   │   └── ThemeContext.tsx
+│   ├── icons
+│   │   └── contains all .svg icons
+│   ├── layout
+│   │   ├── AppHeader.tsx
+│   │   ├── AppSidebar.tsx
+│   │   ├── Backdrop.tsx
+│   │   └── SidebarWidget.tsx
+│   ├── store
+│   │   ├── features
+│   │   ├── hooks.ts
+│   │   └── index.ts
+│   └── svg.d.ts
+└── tsconfig.json
 ```
 
 ## Key differences from version 08
