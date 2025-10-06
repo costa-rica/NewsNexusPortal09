@@ -1,7 +1,7 @@
 // src/app/(dashboard)/layout.tsx
 "use client";
 import React from "react";
-import { SidebarProvider, useSidebar } from "@/context/SidebarContext";
+import { useSidebar } from "@/context/SidebarContext";
 import AppHeader from "@/layout/AppHeader";
 import AppSidebar from "@/layout/AppSidebar";
 import Backdrop from "@/layout/Backdrop";
@@ -11,15 +11,6 @@ export default function DashboardLayout({
 }: {
 	children: React.ReactNode;
 }) {
-	// Don't call useSidebar here — provider isn't mounted yet
-	return (
-		<SidebarProvider>
-			<DashboardShell>{children}</DashboardShell>
-		</SidebarProvider>
-	);
-}
-
-function DashboardShell({ children }: { children: React.ReactNode }) {
 	const { isExpanded, isHovered, isMobileOpen } = useSidebar();
 
 	const mainContentMargin = isMobileOpen

@@ -8,6 +8,7 @@ import {
 	BoxCubeIcon,
 	CalenderIcon,
 	ChevronDownIcon,
+	CloseIcon,
 	GridIcon,
 	HorizontaLDots,
 	ListIcon,
@@ -18,6 +19,7 @@ import {
 	UserCircleIcon,
 } from "../icons/index";
 import SidebarWidget from "./SidebarWidget";
+import { ThemeToggleButton } from "../components/common/ThemeToggleButton";
 
 type NavItem = {
 	name: string;
@@ -95,7 +97,14 @@ const othersItems: NavItem[] = [
 ];
 
 const AppSidebar: React.FC = () => {
-	const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
+	const {
+		isExpanded,
+		isMobileOpen,
+		isHovered,
+		setIsHovered,
+		toggleSidebar,
+		toggleMobileSidebar,
+	} = useSidebar();
 	const pathname = usePathname();
 
 	const renderMenuItems = (
@@ -288,6 +297,14 @@ const AppSidebar: React.FC = () => {
 		});
 	};
 
+	const handleCloseSidebar = () => {
+		if (window.innerWidth >= 1024) {
+			toggleSidebar();
+		} else {
+			toggleMobileSidebar();
+		}
+	};
+
 	return (
 		<aside
 			className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 right-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen transition-all duration-300 ease-in-out z-50 border-l border-gray-200 
@@ -303,40 +320,10 @@ const AppSidebar: React.FC = () => {
 			onMouseEnter={() => !isExpanded && setIsHovered(true)}
 			onMouseLeave={() => setIsHovered(false)}
 		>
-			<div
-				className={`py-8 flex  ${
-					!isExpanded && !isHovered ? "lg:justify-center" : "justify-start"
-				}`}
-			>
-				<Link href="/">
-					{isExpanded || isHovered || isMobileOpen ? (
-						<>
-							<Image
-								className="dark:hidden"
-								src="/images/logo/logo.svg"
-								alt="Logo"
-								width={150}
-								height={40}
-							/>
-							<Image
-								className="hidden dark:block"
-								src="/images/logo/logo-dark.svg"
-								alt="Logo"
-								width={150}
-								height={40}
-							/>
-						</>
-					) : (
-						<Image
-							src="/images/logo/logo-icon.svg"
-							alt="Logo"
-							width={32}
-							height={32}
-						/>
-					)}
-				</Link>
+			<div className="absolute top-6 right-5 z-10">
+				<ThemeToggleButton />
 			</div>
-			<div className="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar">
+			<div className="pt-20 flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar">
 				<nav className="mb-6">
 					<div className="flex flex-col gap-4">
 						<div>
