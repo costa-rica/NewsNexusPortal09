@@ -3,9 +3,19 @@
 ## Overview
 
 NewsNexus Portal is the web interface for the NewsNexus09Db and microservices suite of applications.
+NewsNexusPortal09 is a complete modernization of the previous NewsNexus08Portal web app.
+While v08 was built with plain JavaScript, minimal styling, and without Next.js conventions, v09 rebuilds the Portal from the ground up using Next.js (App Router), TailwindCSS, and TypeScript, ensuring long-term scalability, maintainability, and alignment with modern React best practices.
+
+This version starts from a clean npx create-next-app@latest base and adopts the architectural patterns and UI structure of the open-source free-nextjs-admin-dashboard-main project. That template provides a well-organized file system, reusable components, and responsive dashboard layouts — features that will serve as the foundation for implementing all existing NewsNexus08Portal content, workflows, and user interfaces in a structured, convention-driven way.
+
+The goal of NewsNexusPortal09 is to faithfully re-create and enhance the functionality of the previous Portal within a modern Next.js environment, ultimately serving as the main front end for interacting with NewsNexusAPI09 and the broader News Nexus 09 microservice suite.
+
+### Overview TL;DR
 
 - started from `npx create-next-app@latest`
   - No Turbopack -> this causes problems with the svg icons (src/icons)
+- Heavily lifting the architecture from [free-nextjs-admin-dashboard-main](https://tailadmin.com/download)
+- Customizeing it to fit the needs of the NewsNexus Portal.
 - Uses App Router
 - Uses TailwindCSS
 - Uses Redux for state management
