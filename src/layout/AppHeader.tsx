@@ -9,15 +9,10 @@ import React, { useState, useEffect, useRef } from "react";
 const AppHeader: React.FC = () => {
 	const [isApplicationMenuOpen, setApplicationMenuOpen] = useState(false);
 
-	const { isMobileOpen, isExpanded, toggleSidebar, toggleMobileSidebar } =
-		useSidebar();
+	const { isMobileOpen, toggleMobileSidebar } = useSidebar();
 
 	const handleToggle = () => {
-		if (window.innerWidth >= 1024) {
-			toggleSidebar();
-		} else {
-			toggleMobileSidebar();
-		}
+		toggleMobileSidebar();
 	};
 
 	const toggleApplicationMenu = () => {
@@ -61,9 +56,7 @@ const AppHeader: React.FC = () => {
 						/>
 					</Link>
 					<button
-						className={`flex items-center justify-center w-10 h-10 text-gray-500 border-gray-200 rounded-lg z-99999 dark:border-gray-800 dark:text-gray-400 lg:h-11 lg:w-11 lg:border ${
-							isExpanded ? "lg:hidden" : "lg:ml-auto"
-						}`}
+						className="flex lg:hidden items-center justify-center w-10 h-10 text-gray-500 border-gray-200 rounded-lg z-99999 dark:border-gray-800 dark:text-gray-400"
 						onClick={handleToggle}
 						aria-label="Toggle Sidebar"
 					>

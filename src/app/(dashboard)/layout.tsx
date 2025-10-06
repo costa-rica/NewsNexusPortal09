@@ -11,11 +11,11 @@ export default function DashboardLayout({
 }: {
 	children: React.ReactNode;
 }) {
-	const { isExpanded, isHovered, isMobileOpen } = useSidebar();
+	const { isExpanded, isMobileOpen } = useSidebar();
 
 	const mainContentMargin = isMobileOpen
 		? "mr-0"
-		: isExpanded || isHovered
+		: isExpanded
 		? "lg:mr-[290px]"
 		: "lg:mr-[90px]";
 

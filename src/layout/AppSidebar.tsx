@@ -59,14 +59,8 @@ const othersItems: NavItem[] = [
 ];
 
 const AppSidebar: React.FC = () => {
-	const {
-		isExpanded,
-		isMobileOpen,
-		isHovered,
-		setIsHovered,
-		toggleSidebar,
-		toggleMobileSidebar,
-	} = useSidebar();
+	const { isExpanded, isMobileOpen, toggleSidebar, toggleMobileSidebar } =
+		useSidebar();
 	const pathname = usePathname();
 
 	const renderMenuItems = (
@@ -83,11 +77,7 @@ const AppSidebar: React.FC = () => {
 								openSubmenu?.type === menuType && openSubmenu?.index === index
 									? "menu-item-active"
 									: "menu-item-inactive"
-							} cursor-pointer ${
-								!isExpanded && !isHovered
-									? "lg:justify-center"
-									: "lg:justify-start"
-							}`}
+							} cursor-pointer ${!isExpanded ? "lg:justify-center" : "lg:justify-start"}`}
 						>
 							<span
 								className={` ${
@@ -98,10 +88,10 @@ const AppSidebar: React.FC = () => {
 							>
 								{nav.icon}
 							</span>
-							{(isExpanded || isHovered || isMobileOpen) && (
+							{(isExpanded || isMobileOpen) && (
 								<span className={`menu-item-text`}>{nav.name}</span>
 							)}
-							{(isExpanded || isHovered || isMobileOpen) && (
+							{(isExpanded || isMobileOpen) && (
 								<ChevronDownIcon
 									className={`ml-auto w-5 h-5 transition-transform duration-200  ${
 										openSubmenu?.type === menuType &&
@@ -129,13 +119,13 @@ const AppSidebar: React.FC = () => {
 								>
 									{nav.icon}
 								</span>
-								{(isExpanded || isHovered || isMobileOpen) && (
+								{(isExpanded || isMobileOpen) && (
 									<span className={`menu-item-text`}>{nav.name}</span>
 								)}
 							</Link>
 						)
 					)}
-					{nav.subItems && (isExpanded || isHovered || isMobileOpen) && (
+					{nav.subItems && (isExpanded || isMobileOpen) && (
 						<div
 							ref={(el) => {
 								subMenuRefs.current[`${menuType}-${index}`] = el;
@@ -267,20 +257,20 @@ const AppSidebar: React.FC = () => {
 		}
 	};
 
+	const handleSidebarClick = () => {
+		// Only expand on large screens when sidebar is collapsed
+		if (window.innerWidth >= 1024 && !isExpanded) {
+			toggleSidebar();
+		}
+	};
+
 	return (
 		<aside
-			className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 right-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen transition-all duration-300 ease-in-out z-50 border-l border-gray-200 
-        ${
-					isExpanded || isMobileOpen
-						? "w-[290px]"
-						: isHovered
-						? "w-[290px]"
-						: "w-[90px]"
-				}
+			className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 right-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen transition-all duration-300 ease-in-out z-50 border-l border-gray-200
+        ${isExpanded || isMobileOpen ? "w-[290px]" : "w-[90px] cursor-pointer"}
         ${isMobileOpen ? "translate-x-0" : "translate-x-full"}
         lg:translate-x-0`}
-			onMouseEnter={() => !isExpanded && setIsHovered(true)}
-			onMouseLeave={() => setIsHovered(false)}
+			onClick={handleSidebarClick}
 		>
 			<div className="absolute top-6 left-5 right-5 z-10 flex items-center justify-between">
 				{(isExpanded || isMobileOpen) && (
@@ -301,16 +291,10 @@ const AppSidebar: React.FC = () => {
 						<div>
 							<h2
 								className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${
-									!isExpanded && !isHovered
-										? "lg:justify-center"
-										: "justify-start"
+									!isExpanded ? "lg:justify-center" : "justify-start"
 								}`}
 							>
-								{isExpanded || isHovered || isMobileOpen ? (
-									"Main"
-								) : (
-									<HorizontaLDots />
-								)}
+								{isExpanded || isMobileOpen ? "Main" : <HorizontaLDots />}
 							</h2>
 							{renderMenuItems(navItems, "main")}
 						</div>
@@ -318,22 +302,16 @@ const AppSidebar: React.FC = () => {
 						<div className="">
 							<h2
 								className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${
-									!isExpanded && !isHovered
-										? "lg:justify-center"
-										: "justify-start"
+									!isExpanded ? "lg:justify-center" : "justify-start"
 								}`}
 							>
-								{isExpanded || isHovered || isMobileOpen ? (
-									"Admin"
-								) : (
-									<HorizontaLDots />
-								)}
+								{isExpanded || isMobileOpen ? "Admin" : <HorizontaLDots />}
 							</h2>
 							{renderMenuItems(othersItems, "others")}
 						</div>
 					</div>
 				</nav>
-				{isExpanded || isHovered || isMobileOpen ? <SidebarWidget /> : null}
+				{isExpanded || isMobileOpen ? <SidebarWidget /> : null}
 			</div>
 		</aside>
 	);
