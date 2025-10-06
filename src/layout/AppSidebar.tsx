@@ -259,13 +259,13 @@ const AppSidebar: React.FC = () => {
 		});
 	};
 
-	// const handleCloseSidebar = () => {
-	// 	if (window.innerWidth >= 1024) {
-	// 		toggleSidebar();
-	// 	} else {
-	// 		toggleMobileSidebar();
-	// 	}
-	// };
+	const handleCloseSidebar = () => {
+		if (window.innerWidth >= 1024) {
+			toggleSidebar();
+		} else {
+			toggleMobileSidebar();
+		}
+	};
 
 	return (
 		<aside
@@ -282,7 +282,17 @@ const AppSidebar: React.FC = () => {
 			onMouseEnter={() => !isExpanded && setIsHovered(true)}
 			onMouseLeave={() => setIsHovered(false)}
 		>
-			<div className="absolute top-6 right-5 z-10">
+			<div className="absolute top-6 left-5 right-5 z-10 flex items-center justify-between">
+				{(isExpanded || isMobileOpen) && (
+					<button
+						onClick={handleCloseSidebar}
+						className="hidden lg:flex items-center justify-center text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-white"
+						aria-label="Close Sidebar"
+					>
+						<CloseIcon className="w-6 h-6" />
+					</button>
+				)}
+				{(!isExpanded && !isMobileOpen) && <div />}
 				<ThemeToggleButton />
 			</div>
 			<div className="pt-20 flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar">
