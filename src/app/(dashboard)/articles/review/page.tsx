@@ -7,6 +7,7 @@ import { updateStateArray } from "@/store/features/user/userSlice";
 import Input from "@/components/form/input/InputField";
 import TextArea from "@/components/form/input/TextArea";
 import MultiSelect from "@/components/form/MultiSelect";
+import TableReviewArticles from "@/components/tables/TableReviewArticles";
 
 // export const metadata: Metadata = {
 // 	title: "Review Articles",
@@ -269,6 +270,26 @@ export default function ReviewArticles() {
 		dispatch(updateStateArray(tempStatesArray));
 	};
 
+	const handleSelectArticleFromTable = async (article: Article) => {
+		console.log("Selected article:", article);
+		// TODO: Implement article selection logic from v08
+		setSelectedArticle({
+			...article,
+			content: article.description,
+		});
+		updateStateArrayWithArticleState(article);
+	};
+
+	const handleClickIsReviewed = async (articleId: number) => {
+		console.log("Clicked is reviewed for article:", articleId);
+		// TODO: Implement toggle reviewed logic from v08
+	};
+
+	const handleClickIsRelevant = async (articleId: number) => {
+		console.log("Clicked is relevant for article:", articleId);
+		// TODO: Implement toggle relevant logic from v08
+	};
+
 	return (
 		<div className="flex flex-col gap-4 md:gap-6">
 			<h1 className="text-title-xl text-gray-700 dark:text-gray-300">
@@ -391,6 +412,16 @@ export default function ReviewArticles() {
 					</div>
 				</div>
 			</div>
+
+			{/* Articles Table */}
+			<TableReviewArticles
+				data={articlesArray}
+				selectedRowId={selectedArticle?.id}
+				loading={loadingComponents.table01}
+				onSelectArticle={handleSelectArticleFromTable}
+				onToggleReviewed={handleClickIsReviewed}
+				onToggleRelevant={handleClickIsRelevant}
+			/>
 		</div>
 	);
 }
