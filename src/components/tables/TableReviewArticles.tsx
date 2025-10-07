@@ -14,6 +14,7 @@ import {
 } from "@tanstack/react-table";
 import Link from "next/link";
 import type { Article } from "@/types/article";
+import ColumnVisibilityDropdown from "./ColumnVisibilityDropdown";
 
 interface TableReviewArticlesProps {
 	data: Article[];
@@ -38,6 +39,7 @@ const TableReviewArticles: React.FC<TableReviewArticlesProps> = ({
 	});
 	const [sorting, setSorting] = useState<SortingState>([]);
 	const [globalFilter, setGlobalFilter] = useState("");
+	const [columnVisibility, setColumnVisibility] = useState({});
 
 	const columnHelper = createColumnHelper<Article>();
 
@@ -217,10 +219,12 @@ const TableReviewArticles: React.FC<TableReviewArticlesProps> = ({
 			pagination,
 			sorting,
 			globalFilter,
+			columnVisibility,
 		},
 		onSortingChange: setSorting,
 		onPaginationChange: setPagination,
 		onGlobalFilterChange: setGlobalFilter,
+		onColumnVisibilityChange: setColumnVisibility,
 		autoResetPageIndex: false,
 	});
 
@@ -265,6 +269,9 @@ const TableReviewArticles: React.FC<TableReviewArticlesProps> = ({
 						</button>
 					))}
 				</div>
+
+				{/* Column Visibility Dropdown */}
+				<ColumnVisibilityDropdown table={table} />
 
 				{/* Search */}
 				<div className="flex-1 max-w-xs">
