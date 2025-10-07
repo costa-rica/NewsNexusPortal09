@@ -8,24 +8,12 @@ import Input from "@/components/form/input/InputField";
 import TextArea from "@/components/form/input/TextArea";
 import MultiSelect from "@/components/form/MultiSelect";
 import TableReviewArticles from "@/components/tables/TableReviewArticles";
+import type { Article } from "@/types/article";
 
 // export const metadata: Metadata = {
 // 	title: "Review Articles",
 // 	description: "The articles that need to be reviewed",
 // };
-
-interface Article {
-	id: number;
-	title: string;
-	publicationName: string;
-	publishedDate: string;
-	content?: string;
-	description?: string;
-	url?: string;
-	isApproved?: boolean;
-	States?: Array<{ id: number; name: string }>;
-	isRelevant?: boolean;
-}
 
 export default function ReviewArticles() {
 	const dispatch = useAppDispatch();

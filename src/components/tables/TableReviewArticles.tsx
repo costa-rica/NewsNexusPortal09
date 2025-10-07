@@ -13,22 +13,7 @@ import {
 	PaginationState,
 } from "@tanstack/react-table";
 import Link from "next/link";
-
-interface Article {
-	id: number;
-	title: string;
-	description: string;
-	publishedDate: string;
-	url: string;
-	isBeingReviewed: boolean;
-	isRelevant: boolean;
-	isApproved?: boolean;
-	statesStringCommaSeparated?: string;
-	requestQueryString?: string;
-	nameOfOrg?: string;
-	semanticRatingMax?: number | string;
-	locationClassifierScore?: number | string;
-}
+import type { Article } from "@/types/article";
 
 interface TableReviewArticlesProps {
 	data: Article[];
