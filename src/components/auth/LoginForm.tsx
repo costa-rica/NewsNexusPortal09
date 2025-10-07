@@ -5,11 +5,11 @@ import Label from "@/components/form/Label";
 import Button from "@/components/ui/button/Button";
 import { ChevronLeftIcon, EyeCloseIcon, EyeIcon } from "@/icons";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { useRouter } from "next/navigation";
-import { loginUser } from "@/store/features/user/userSlice";
+import { loginUser, updateStateArray } from "@/store/features/user/userSlice";
 
 // export default function SignInForm() {
 export default function LoginForm() {
@@ -27,6 +27,43 @@ export default function LoginForm() {
 	const router = useRouter();
 	// const userReducer = useSelector((state) => state.user);
 	const userReducer = useAppSelector((s) => s.user);
+
+	useEffect(() => {
+		// Only fetch if stateArray is empty
+		if (userReducer.stateArray.length === 0) {
+			fetchStateArray();
+		}
+	}, []);
+
+	const fetchStateArray = async () => {
+		try {
+			const response = await fetch(
+				`${process.env.NEXT_PUBLIC_API_BASE_URL}/states`
+			);
+
+			console.log(`Response status: ${response.status}`);
+
+			if (!response.ok) {
+				const errorText = await response.text();
+				throw new Error(`Server Error: ${errorText}`);
+			}
+
+			const result = await response.json();
+			console.log("Fetched Data (states):", result);
+
+			if (result.statesArray && Array.isArray(result.statesArray)) {
+				const tempStatesArray = result.statesArray.map((stateObj: any) => ({
+					...stateObj,
+					selected: false,
+				}));
+				dispatch(updateStateArray(tempStatesArray));
+			} else {
+				dispatch(updateStateArray([]));
+			}
+		} catch (error) {
+			console.error("Error fetching states:", error);
+		}
+	};
 
 	const handleClickLogin = async () => {
 		console.log(

@@ -1,19 +1,283 @@
+"use client";
 import type { Metadata } from "next";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { SummaryStatistics } from "@/components/common/SummaryStatistics";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { updateStateArray } from "@/store/features/user/userSlice";
+import Input from "@/components/form/input/InputField";
+import TextArea from "@/components/form/input/TextArea";
+import MultiSelect from "@/components/form/MultiSelect";
 
-export const metadata: Metadata = {
-	title: "Review Articles",
-	description: "The articles that need to be reviewed",
-};
+// export const metadata: Metadata = {
+// 	title: "Review Articles",
+// 	description: "The articles that need to be reviewed",
+// };
+
+interface Article {
+	id: number;
+	title: string;
+	publicationName: string;
+	publishedDate: string;
+	content?: string;
+	description?: string;
+	url?: string;
+	isApproved?: boolean;
+	States?: Array<{ id: number; name: string }>;
+}
 
 export default function ReviewArticles() {
+	const dispatch = useAppDispatch();
+	const { token, stateArray } = useAppSelector((state) => state.user);
+	const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
+
+	// Transform stateArray for MultiSelect component
+	const stateOptions = stateArray.map((state) => ({
+		value: state.id.toString(),
+		text: state.name,
+		selected: state.selected || false,
+	}));
+
+	const selectedStateValues = stateOptions
+		.filter((opt) => opt.selected)
+		.map((opt) => opt.value);
+
+	const handleStateChange = (selectedValues: string[]) => {
+		const updatedStateArray = stateArray.map((state) => ({
+			...state,
+			selected: selectedValues.includes(state.id.toString()),
+		}));
+		dispatch(updateStateArray(updatedStateArray));
+	};
+
+	const handleValidateState = async () => {
+		if (!selectedArticle) return;
+
+		const selectedStateIds = stateArray
+			.filter((st) => st.selected)
+			.map((st) => st.id);
+
+		try {
+			const response = await fetch(
+				`${process.env.NEXT_PUBLIC_API_BASE_URL}/states/${selectedArticle.id}`,
+				{
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+						Authorization: `Bearer ${token}`,
+					},
+					body: JSON.stringify({ stateIdArray: selectedStateIds }),
+				}
+			);
+
+			if (!response.ok) {
+				const errorText = await response.text();
+				throw new Error(`Server Error: ${errorText}`);
+			}
+
+			const result = await response.json();
+			console.log("State validated:", result);
+			// TODO: Show success message
+		} catch (error) {
+			console.error("Error validating states:", error);
+		}
+	};
+
+	const handleApproveArticle = async () => {
+		if (!selectedArticle) return;
+
+		const bodyObj = {
+			approvedStatus: selectedArticle.isApproved ? "Un-approve" : "Approve",
+			isApproved: !selectedArticle.isApproved,
+			headlineForPdfReport: selectedArticle.title,
+			publicationNameForPdfReport: selectedArticle.publicationName,
+			publicationDateForPdfReport: selectedArticle.publishedDate,
+			textForPdfReport: selectedArticle.content || "",
+			urlForPdfReport: selectedArticle.url || "",
+			kmNotes: "",
+		};
+
+		try {
+			const response = await fetch(
+				`${process.env.NEXT_PUBLIC_API_BASE_URL}/articles/approve/${selectedArticle.id}`,
+				{
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+						Authorization: `Bearer ${token}`,
+					},
+					body: JSON.stringify(bodyObj),
+				}
+			);
+
+			if (!response.ok) {
+				const errorText = await response.text();
+				throw new Error(`Server Error: ${errorText}`);
+			}
+
+			const result = await response.json();
+			console.log("Article approved:", result);
+
+			setSelectedArticle({
+				...selectedArticle,
+				isApproved: !selectedArticle.isApproved,
+			});
+		} catch (error) {
+			console.error("Error approving article:", error);
+		}
+	};
+
+	const handleUpdateContent = async () => {
+		if (!selectedArticle) return;
+
+		try {
+			const response = await fetch(
+				`${process.env.NEXT_PUBLIC_API_BASE_URL}/articles/update-approved`,
+				{
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+						Authorization: `Bearer ${token}`,
+					},
+					body: JSON.stringify({
+						articleId: selectedArticle.id,
+						contentToUpdate: selectedArticle.content,
+					}),
+				}
+			);
+
+			if (!response.ok) {
+				const errorText = await response.text();
+				throw new Error(`Server Error: ${errorText}`);
+			}
+
+			const result = await response.json();
+			console.log("Content updated:", result);
+			// TODO: Show success message
+		} catch (error) {
+			console.error("Error updating content:", error);
+		}
+	};
+
 	return (
 		<div className="flex flex-col gap-4 md:gap-6">
 			<h1 className="text-title-xl text-gray-700 dark:text-gray-300">
 				Review Articles
 			</h1>
 			<SummaryStatistics />
+
+			{/* Article Approval Form */}
+			<div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
+				<div className="mb-6 flex items-center gap-2">
+					<h2 className="text-title-md font-semibold text-gray-800 dark:text-white/90">
+						Article Approval Details
+					</h2>
+					{selectedArticle && (
+						<span className="text-sm text-gray-500 dark:text-gray-400">
+							(article Id: {selectedArticle.id})
+						</span>
+					)}
+				</div>
+
+				<div className="grid grid-cols-1 gap-6">
+					{/* Headline */}
+					<div>
+						<label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+							Headline
+						</label>
+						<Input
+							type="text"
+							value={selectedArticle?.title || ""}
+							disabled
+							placeholder="No article selected"
+						/>
+					</div>
+
+					{/* Publication */}
+					<div>
+						<label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+							Publication
+						</label>
+						<Input
+							type="text"
+							value={selectedArticle?.publicationName || ""}
+							disabled
+							placeholder="No article selected"
+						/>
+					</div>
+
+					{/* Publication Date */}
+					<div>
+						<label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+							Publication Date
+						</label>
+						<Input
+							type="date"
+							value={selectedArticle?.publishedDate || ""}
+							disabled
+						/>
+					</div>
+
+					{/* Article State */}
+					<div>
+						<MultiSelect
+							label="Article State"
+							options={stateOptions}
+							defaultSelected={selectedStateValues}
+							onChange={handleStateChange}
+						/>
+						<button
+							onClick={handleValidateState}
+							disabled={!selectedArticle}
+							className="mt-3 rounded-lg bg-brand-500 px-6 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-600 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-brand-600 dark:hover:bg-brand-700"
+						>
+							Validate State
+						</button>
+					</div>
+
+					{/* Content */}
+					<div>
+						<label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+							Content
+						</label>
+						<TextArea
+							rows={8}
+							value={selectedArticle?.content || selectedArticle?.description || ""}
+							onChange={(value) =>
+								setSelectedArticle(
+									selectedArticle
+										? { ...selectedArticle, content: value }
+										: null
+								)
+							}
+							disabled={!selectedArticle}
+							placeholder="Article content will appear here"
+						/>
+					</div>
+
+					{/* Action Buttons */}
+					<div className="flex gap-3">
+						<button
+							onClick={handleApproveArticle}
+							disabled={!selectedArticle}
+							className={`rounded-lg px-6 py-2 text-sm font-medium text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+								selectedArticle?.isApproved
+									? "bg-gray-500 hover:bg-gray-600 dark:bg-gray-600 dark:hover:bg-gray-700"
+									: "bg-brand-500 hover:bg-brand-600 dark:bg-brand-600 dark:hover:bg-brand-700"
+							}`}
+						>
+							{selectedArticle?.isApproved ? "Un-approve" : "Approve"}
+						</button>
+						{selectedArticle?.isApproved && (
+							<button
+								onClick={handleUpdateContent}
+								className="rounded-lg bg-brand-500 px-6 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-600 dark:bg-brand-600 dark:hover:bg-brand-700"
+							>
+								Update Content
+							</button>
+						)}
+					</div>
+				</div>
+			</div>
 		</div>
 	);
 }
