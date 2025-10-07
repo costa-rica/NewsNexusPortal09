@@ -335,18 +335,24 @@ const TableReviewArticles: React.FC<TableReviewArticlesProps> = ({
 						))}
 					</thead>
 					<tbody className="divide-y divide-gray-200 dark:divide-gray-800">
-						{table.getPaginationRowModel().rows.map((row) => (
+						{table.getPaginationRowModel().rows.map((row) => {
+							const isSelected = row.original.id === selectedRowId;
+							const isApproved = row.original.isApproved;
+
+							// Priority: Approved > Selected > Default
+							let rowClasses = "transition-colors";
+							if (isApproved) {
+								rowClasses += " bg-green-100 dark:bg-green-900/30 hover:bg-green-200 dark:hover:bg-green-900/40";
+							} else if (isSelected) {
+								rowClasses += " bg-brand-50 dark:bg-brand-900/20 hover:bg-brand-100 dark:hover:bg-brand-900/30";
+							} else {
+								rowClasses += " hover:bg-gray-50 dark:hover:bg-gray-800/50";
+							}
+
+							return (
 							<tr
 								key={row.id}
-								className={`transition-colors ${
-									row.original.id === selectedRowId
-										? "bg-brand-50 dark:bg-brand-900/20"
-										: ""
-								} ${
-									row.original.isApproved
-										? "bg-green-50 dark:bg-green-900/20"
-										: ""
-								} hover:bg-gray-50 dark:hover:bg-gray-800/50`}
+								className={rowClasses}
 							>
 								{row.getVisibleCells().map((cell) => (
 									<td
@@ -357,7 +363,8 @@ const TableReviewArticles: React.FC<TableReviewArticlesProps> = ({
 									</td>
 								))}
 							</tr>
-						))}
+							);
+						})}
 					</tbody>
 				</table>
 			</div>

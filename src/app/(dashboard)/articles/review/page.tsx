@@ -118,10 +118,21 @@ export default function ReviewArticles() {
 			const result = await response.json();
 			console.log("Article approved:", result);
 
+			// Update selectedArticle
+			const newApprovedStatus = !selectedArticle.isApproved;
 			setSelectedArticle({
 				...selectedArticle,
-				isApproved: !selectedArticle.isApproved,
+				isApproved: newApprovedStatus,
 			});
+
+			// Update articlesArray so table row color changes
+			setArticlesArray((prevArray) =>
+				prevArray.map((article) =>
+					article.id === selectedArticle.id
+						? { ...article, isApproved: newApprovedStatus }
+						: article
+				)
+			);
 		} catch (error) {
 			console.error("Error approving article:", error);
 		}
@@ -260,12 +271,52 @@ export default function ReviewArticles() {
 
 	const handleSelectArticleFromTable = async (article: Article) => {
 		console.log("Selected article:", article);
-		// TODO: Implement article selection logic from v08
-		setSelectedArticle({
-			...article,
-			content: article.description,
-		});
-		updateStateArrayWithArticleState(article);
+
+		// Fetch approved version if it exists (from v08 logic)
+		try {
+			const response = await fetch(
+				`${process.env.NEXT_PUBLIC_API_BASE_URL}/articles/get-approved/${article.id}`,
+				{
+					headers: { Authorization: `Bearer ${token}` },
+				}
+			);
+
+			if (!response.ok) {
+				const errorText = await response.text();
+				throw new Error(`Server Error: ${errorText}`);
+			}
+
+			const result = await response.json();
+			console.log("Fetched approved article data:", result);
+
+			if (result.article && result.article.id) {
+				// Approved version exists - use approved content
+				setSelectedArticle({
+					...result.article,
+					...article,
+					approved: result.result,
+					content: result.content,
+					isApproved: true, // Mark as approved
+				});
+				updateStateArrayWithArticleState(result.article);
+			} else {
+				// No approved version - use regular article
+				setSelectedArticle({
+					...article,
+					content: article.description,
+					isApproved: false,
+				});
+				updateStateArrayWithArticleState(article);
+			}
+		} catch (error) {
+			console.error("Error fetching approved article:", error);
+			// Fallback to regular article on error
+			setSelectedArticle({
+				...article,
+				content: article.description,
+			});
+			updateStateArrayWithArticleState(article);
+		}
 	};
 
 	const handleClickIsReviewed = async (articleId: number) => {
