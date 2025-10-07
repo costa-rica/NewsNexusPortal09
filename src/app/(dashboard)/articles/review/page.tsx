@@ -23,12 +23,24 @@ interface Article {
 	url?: string;
 	isApproved?: boolean;
 	States?: Array<{ id: number; name: string }>;
+	isRelevant?: boolean;
 }
 
 export default function ReviewArticles() {
 	const dispatch = useAppDispatch();
 	const { token, stateArray } = useAppSelector((state) => state.user);
+	const [articlesArray, setArticlesArray] = useState<Article[]>([]);
 	const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
+	const userReducer = useAppSelector((s) => s.user);
+	const [loadingComponents, setLoadingComponents] = useState({
+		table01: false,
+	});
+	const [loadingTimes, setLoadingTimes] = useState({
+		timeToRenderTable01InSeconds: "0 s",
+		timeToRenderResponseFromApiInSeconds: "0 s",
+	});
+	const [allowUpdateSelectedArticle, setAllowUpdateSelectedArticle] =
+		useState(true);
 
 	// Transform stateArray for MultiSelect component
 	const stateOptions = stateArray.map((state) => ({
@@ -158,6 +170,105 @@ export default function ReviewArticles() {
 		}
 	};
 
+	const fetchArticlesArray = async () => {
+		let startTime = null;
+		const bodyParams = {
+			...userReducer.articleTableBodyParams,
+			// entityWhoCategorizesIdSemantic: 1,
+			semanticScorerEntityName: "NewsNexusSemanticScorer02",
+		};
+
+		try {
+			setLoadingComponents((prev) => ({
+				...prev,
+				table01: true,
+			}));
+			const response = await fetch(
+				`${process.env.NEXT_PUBLIC_API_BASE_URL}/articles/with-ratings`,
+				{
+					headers: {
+						Authorization: `Bearer ${userReducer.token}`,
+						"Content-Type": "application/json",
+					},
+					method: "POST",
+					body: JSON.stringify(bodyParams),
+				}
+			);
+
+			console.log(`Response status: ${response.status}`);
+
+			if (!response.ok) {
+				const errorText = await response.text(); // Log response text for debugging
+				throw new Error(`Server Error: ${errorText}`);
+			}
+
+			const result = await response.json();
+			console.log("Fetched Data:", result);
+
+			startTime = Date.now();
+			if (result.articlesArray && Array.isArray(result.articlesArray)) {
+				setArticlesArray(result.articlesArray);
+				setLoadingTimes((prev) => ({
+					...prev,
+					timeToRenderResponseFromApiInSeconds: `${result.timeToRenderResponseFromApiInSeconds.toFixed(
+						1
+					)} s`,
+				}));
+			} else {
+				setArticlesArray([]);
+			}
+		} catch (error) {
+			console.error("Error fetching data:", error);
+			setArticlesArray([]);
+		}
+		setLoadingComponents((prev) => ({
+			...prev,
+			table01: false,
+		}));
+
+		const loadTimeLabel = `${
+			startTime ? ((Date.now() - startTime) / 1000).toFixed(1) : 0
+		} s`;
+		setLoadingTimes((prev) => ({
+			...prev,
+			timeToRenderTable01InSeconds: loadTimeLabel,
+		}));
+	};
+
+	useEffect(() => {
+		fetchArticlesArray();
+	}, []);
+
+	useEffect(() => {
+		if (!allowUpdateSelectedArticle) return;
+		const filteredArticles = userReducer.hideIrrelevant
+			? articlesArray.filter((article) => article.isRelevant !== false)
+			: articlesArray;
+
+		if (filteredArticles.length > 0) {
+			setSelectedArticle({
+				...filteredArticles[0],
+				content: filteredArticles[0].description,
+			});
+			updateStateArrayWithArticleState(filteredArticles[0]);
+		}
+	}, [articlesArray, userReducer.hideIrrelevant]);
+
+	const updateStateArrayWithArticleState = (article: Article) => {
+		if (!article?.States) {
+			return;
+		}
+		const articleStateIds = article.States.map((state) => state.id);
+		const tempStatesArray = userReducer.stateArray.map((stateObj) => {
+			if (articleStateIds.includes(stateObj.id)) {
+				return { ...stateObj, selected: true };
+			} else {
+				return { ...stateObj, selected: false };
+			}
+		});
+		dispatch(updateStateArray(tempStatesArray));
+	};
+
 	return (
 		<div className="flex flex-col gap-4 md:gap-6">
 			<h1 className="text-title-xl text-gray-700 dark:text-gray-300">
@@ -241,7 +352,9 @@ export default function ReviewArticles() {
 						</label>
 						<TextArea
 							rows={8}
-							value={selectedArticle?.content || selectedArticle?.description || ""}
+							value={
+								selectedArticle?.content || selectedArticle?.description || ""
+							}
 							onChange={(value) =>
 								setSelectedArticle(
 									selectedArticle

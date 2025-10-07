@@ -1,38 +1,6 @@
-// // src/store/features/user/userSlice.ts
-// import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-
-// export type UserState = {
-// 	id?: string;
-// 	email?: string;
-// 	token?: string; // JWT or session token (optional)
-// };
-
-// const initialState: UserState = {};
-
-// const userSlice = createSlice({
-// 	name: "user",
-// 	initialState,
-// 	reducers: {
-// 		setUser: (state, action: PayloadAction<UserState>) => ({
-// 			...state,
-// 			...action.payload,
-// 		}),
-// 		clearUser: () => ({}),
-// 	},
-// });
-
-// export const { setUser, clearUser } = userSlice.actions;
-// export default userSlice.reducer;
+// src/store/features/user/userSlice.ts
 
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-
-// export interface NavExpandObject {
-// 	GetArticles: boolean;
-// 	ManageArticles: boolean;
-// 	ManageDb: boolean;
-// 	AdminGeneral: boolean;
-// 	ReportsAnalysis: boolean;
-// }
 
 export interface RequestTableBodyParams {
 	includeIsFromAutomation: boolean;
@@ -59,7 +27,6 @@ export interface UserState {
 	articlesSummaryStatistics: Record<string, any>;
 	hideIrrelevant: boolean;
 	hideApproved?: boolean;
-	// navExpandObject: NavExpandObject;
 	requestTableBodyParams: RequestTableBodyParams;
 	articleTableBodyParams: ArticleTableBodyParams;
 	approvedArticlesArray: any[];
@@ -75,13 +42,6 @@ const initialState: UserState = {
 	articlesSummaryStatistics: {},
 	hideIrrelevant: false,
 	hideApproved: false,
-	// navExpandObject: {
-	// 	GetArticles: false,
-	// 	ManageArticles: false,
-	// 	ManageDb: false,
-	// 	AdminGeneral: false,
-	// 	ReportsAnalysis: false,
-	// },
 	requestTableBodyParams: {
 		includeIsFromAutomation: false,
 		dateLimitOnRequestMade: null,
@@ -142,14 +102,6 @@ export const userSlice = createSlice({
 			state.articleTableBodyParams.returnOnlyIsNotApproved = state.hideApproved;
 		},
 
-		// toggleNavExpandItem: (
-		// 	state,
-		// 	action: PayloadAction<keyof NavExpandObject>
-		// ) => {
-		// 	const item = action.payload;
-		// 	state.navExpandObject[item] = !state.navExpandObject[item];
-		// },
-
 		updateRequestTableBodyParams: (
 			state,
 			action: PayloadAction<Partial<RequestTableBodyParams>>
@@ -194,13 +146,6 @@ export const userSlice = createSlice({
 				returnOnlyIsRelevant: true,
 			};
 			state.approvedArticlesArray = [];
-			// state.navExpandObject = {
-			// 	GetArticles: false,
-			// 	ManageArticles: false,
-			// 	ManageDb: false,
-			// 	AdminGeneral: false,
-			// 	ReportsAnalysis: false,
-			// };
 			console.log("-----> Finished Super Logout !!!");
 		},
 
@@ -223,7 +168,6 @@ export const {
 	updateArticlesSummaryStatistics,
 	toggleHideIrrelevant,
 	toggleHideApproved,
-	// toggleNavExpandItem,
 	updateRequestTableBodyParams,
 	updateArticleTableBodyParams,
 	updateApprovedArticlesArray,
