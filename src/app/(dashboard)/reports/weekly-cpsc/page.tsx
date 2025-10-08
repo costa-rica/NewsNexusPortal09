@@ -18,11 +18,18 @@ export default function WeeklyCpsc() {
 	);
 	const [reportsArray, setReportsArray] = useState([]);
 	const [selectedReport, setSelectedReport] = useState<any>(null);
-	const [selectedArticle, setSelectedArticle] = useState<ApprovedArticle | null>(null);
+	const [selectedArticle, setSelectedArticle] =
+		useState<ApprovedArticle | null>(null);
 	const [loadingReports, setLoadingReports] = useState(false);
 	const [isOpenModalReportDate, setIsOpenModalReportDate] = useState(false);
-	const [isOpenModalArticleReferenceNumber, setIsOpenModalArticleReferenceNumber] = useState(false);
-	const [isOpenModalArticleRejectionStatus, setIsOpenModalArticleRejectionStatus] = useState(false);
+	const [
+		isOpenModalArticleReferenceNumber,
+		setIsOpenModalArticleReferenceNumber,
+	] = useState(false);
+	const [
+		isOpenModalArticleRejectionStatus,
+		setIsOpenModalArticleRejectionStatus,
+	] = useState(false);
 
 	useEffect(() => {
 		fetchReportsArray();
@@ -92,9 +99,8 @@ export default function WeeklyCpsc() {
 	};
 
 	const stagedArticlesCount =
-		approvedArticlesArray?.filter(
-			(article) => article.stageArticleForReport
-		).length || 0;
+		approvedArticlesArray?.filter((article) => article.stageArticleForReport)
+			.length || 0;
 
 	// Update staged articles table when a report ID is clicked
 	const handleUpdateStagedArticles = (articleIds: number[]) => {
@@ -103,6 +109,93 @@ export default function WeeklyCpsc() {
 			stageArticleForReport: articleIds.includes(article.id),
 		}));
 		dispatch(updateApprovedArticlesArray(updatedArray));
+	};
+
+	// Toggle select all articles
+	const handleSelectAll = () => {
+		const allSelected = approvedArticlesArray.every(
+			(article) => article.stageArticleForReport
+		);
+
+		const updatedArray = approvedArticlesArray.map((article) => ({
+			...article,
+			stageArticleForReport: !allSelected,
+		}));
+
+		dispatch(updateApprovedArticlesArray(updatedArray));
+	};
+
+	// Toggle select all articles not in any report
+	const handleSelectAllNotInReport = () => {
+		const articlesNotInReport = approvedArticlesArray.filter(
+			(a) => a.ArticleReportContracts.length === 0
+		);
+
+		const allNotInReportAreSelected = articlesNotInReport.every(
+			(a) => a.stageArticleForReport
+		);
+
+		const updatedArray = approvedArticlesArray.map((article) => {
+			if (article.ArticleReportContracts.length === 0) {
+				return {
+					...article,
+					stageArticleForReport: !allNotInReportAreSelected,
+				};
+			}
+			return article;
+		});
+
+		dispatch(updateApprovedArticlesArray(updatedArray));
+	};
+
+	// Create report with staged articles
+	const handleCreateReport = async () => {
+		if (
+			!window.confirm(
+				"This will create a report with all the staged articles. Continue?"
+			)
+		) {
+			return;
+		}
+
+		setLoadingReports(true);
+		const articlesIdArrayForReport = approvedArticlesArray
+			.filter((article) => article.stageArticleForReport)
+			.map((article) => article.id);
+
+		try {
+			const response = await fetch(
+				`${process.env.NEXT_PUBLIC_API_BASE_URL}/reports/create`,
+				{
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+						Authorization: `Bearer ${token}`,
+					},
+					body: JSON.stringify({ articlesIdArrayForReport }),
+				}
+			);
+
+			if (!response.ok) {
+				const errorText = await response.text();
+				throw new Error(`Server Error: ${errorText}`);
+			}
+
+			const resJson = await response.json();
+
+			if (resJson?.error) {
+				alert(`Error Creating Report: ${resJson.error}`);
+			} else {
+				alert("Report created successfully!");
+			}
+
+			fetchReportsArray();
+		} catch (error) {
+			console.error("Error creating report:", error);
+			alert("Error creating report. Please try again.");
+		} finally {
+			setLoadingReports(false);
+		}
 	};
 
 	// Open date modal for editing submission date
@@ -260,13 +353,16 @@ export default function WeeklyCpsc() {
 	return (
 		<div className="flex flex-col gap-4 md:gap-6">
 			<h1 className="text-title-xl text-gray-700 dark:text-gray-300">
-				Create Report
+				CPSC Weekly Reports
 			</h1>
 
 			{/* Top Section - Two Tables Side by Side */}
 			<div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
 				{/* Top Left - Reports Table */}
 				<div className="flex flex-col gap-4">
+					<h2 className="text-title-md font-semibold text-gray-800 dark:text-white/90">
+						Reports ({reportsArray?.length || 0})
+					</h2>
 					<TableReportsWeeklyCpsc
 						data={reportsArray}
 						loading={loadingReports}
@@ -306,6 +402,52 @@ export default function WeeklyCpsc() {
 				<h2 className="text-title-md font-semibold text-gray-800 dark:text-white/90">
 					Approved Articles ({approvedArticlesArray?.length || 0})
 				</h2>
+
+				{/* Action Buttons Row */}
+				<div className="flex items-center justify-between gap-4">
+					{/* Left side - Refresh */}
+					<button
+						onClick={fetchApprovedArticlesArray}
+						className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+					>
+						Refresh
+					</button>
+
+					{/* Right side - Select All, Select All Not in Report, Create Report */}
+					<div className="flex items-center gap-3">
+						<button
+							onClick={handleSelectAll}
+							className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+						>
+							{approvedArticlesArray?.length > 0 &&
+							approvedArticlesArray.every(
+								(article) => article.stageArticleForReport
+							)
+								? "Unselect All"
+								: "Select All"}
+						</button>
+
+						<button
+							onClick={handleSelectAllNotInReport}
+							className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+						>
+							{approvedArticlesArray
+								?.filter((a) => a.ArticleReportContracts.length === 0)
+								.every((a) => a.stageArticleForReport)
+								? "Unselect All Not in a Report"
+								: "Select All Not in a Report"}
+						</button>
+
+						<button
+							onClick={handleCreateReport}
+							disabled={stagedArticlesCount === 0}
+							className="px-4 py-2 bg-brand-500 text-white rounded-lg font-medium hover:bg-brand-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors dark:bg-brand-600 dark:hover:bg-brand-700"
+						>
+							Create Report
+						</button>
+					</div>
+				</div>
+
 				<TableApprovedArticles
 					data={approvedArticlesArray || []}
 					onOpenReferenceNumberModal={(article) => {
