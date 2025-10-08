@@ -8,6 +8,8 @@ import TableApprovedArticles from "@/components/tables/TableApprovedArticles";
 import { ApprovedArticle } from "@/types/article";
 import { Modal } from "@/components/ui/modal";
 import { ModalReportDateContent } from "@/components/ui/modal/ModalReportDateContent";
+import { ModalArticleReferenceNumberContent } from "@/components/ui/modal/ModalArticleReferenceNumberContent";
+import { ModalArticleRejectionStatus } from "@/components/ui/modal/ModalArticleRejectionStatus";
 
 export default function WeeklyCpsc() {
 	const dispatch = useAppDispatch();
@@ -19,6 +21,8 @@ export default function WeeklyCpsc() {
 	const [selectedArticle, setSelectedArticle] = useState<ApprovedArticle | null>(null);
 	const [loadingReports, setLoadingReports] = useState(false);
 	const [isOpenModalReportDate, setIsOpenModalReportDate] = useState(false);
+	const [isOpenModalArticleReferenceNumber, setIsOpenModalArticleReferenceNumber] = useState(false);
+	const [isOpenModalArticleRejectionStatus, setIsOpenModalArticleRejectionStatus] = useState(false);
 
 	useEffect(() => {
 		fetchReportsArray();
@@ -287,13 +291,11 @@ export default function WeeklyCpsc() {
 						}
 						onOpenReferenceNumberModal={(article) => {
 							setSelectedArticle(article);
-							// TODO: setIsOpenModalArticleReferenceNumber(true);
-							console.log("Open reference number modal for article:", article.id);
+							setIsOpenModalArticleReferenceNumber(true);
 						}}
 						onOpenRejectedModal={(article) => {
 							setSelectedArticle(article);
-							// TODO: setIsOpenModalReportRejected(true);
-							console.log("Open rejected modal for article:", article.id);
+							setIsOpenModalArticleRejectionStatus(true);
 						}}
 					/>
 				</div>
@@ -308,13 +310,11 @@ export default function WeeklyCpsc() {
 					data={approvedArticlesArray || []}
 					onOpenReferenceNumberModal={(article) => {
 						setSelectedArticle(article);
-						// TODO: setIsOpenModalArticleReferenceNumber(true);
-						console.log("Open reference number modal for article:", article.id);
+						setIsOpenModalArticleReferenceNumber(true);
 					}}
 					onOpenRejectedModal={(article) => {
 						setSelectedArticle(article);
-						// TODO: setIsOpenModalReportRejected(true);
-						console.log("Open rejected modal for article:", article.id);
+						setIsOpenModalArticleRejectionStatus(true);
 					}}
 					onToggleStage={(articleId) => {
 						const updatedArray = approvedArticlesArray.map((article) =>
@@ -339,6 +339,34 @@ export default function WeeklyCpsc() {
 					<ModalReportDateContent
 						selectedReport={selectedReport}
 						onSubmit={handleUpdateReportDate}
+					/>
+				</Modal>
+			)}
+
+			{isOpenModalArticleReferenceNumber && selectedArticle && token && (
+				<Modal
+					isOpen={isOpenModalArticleReferenceNumber}
+					onClose={() => setIsOpenModalArticleReferenceNumber(false)}
+				>
+					<ModalArticleReferenceNumberContent
+						selectedArticle={selectedArticle}
+						token={token}
+						onClose={() => setIsOpenModalArticleReferenceNumber(false)}
+						onRefresh={fetchApprovedArticlesArray}
+					/>
+				</Modal>
+			)}
+
+			{isOpenModalArticleRejectionStatus && selectedArticle && token && (
+				<Modal
+					isOpen={isOpenModalArticleRejectionStatus}
+					onClose={() => setIsOpenModalArticleRejectionStatus(false)}
+				>
+					<ModalArticleRejectionStatus
+						selectedArticle={selectedArticle}
+						token={token}
+						onClose={() => setIsOpenModalArticleRejectionStatus(false)}
+						onRefresh={fetchApprovedArticlesArray}
 					/>
 				</Modal>
 			)}
