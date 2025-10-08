@@ -4,6 +4,7 @@ import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import { updateApprovedArticlesArray } from "@/store/features/user/userSlice";
 import TableReportsWeeklyCpsc from "@/components/tables/TableReportsWeeklyCpsc";
 import TableReportWeeklyCpscStagedArticles from "@/components/tables/TableReportWeeklyCpscStagedArticles";
+import TableApprovedArticles from "@/components/tables/TableApprovedArticles";
 import { ApprovedArticle } from "@/types/article";
 
 export default function WeeklyCpsc() {
@@ -269,14 +270,33 @@ export default function WeeklyCpsc() {
 
 			{/* Bottom Section - Approved Articles Table */}
 			<div className="flex flex-col gap-4">
-				<div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
-					<h2 className="text-title-md font-semibold text-gray-800 dark:text-white/90 mb-4">
-						TableApprovedArticles (count: {approvedArticlesArray?.length || 0})
-					</h2>
-					<p className="text-sm text-gray-600 dark:text-gray-400">
-						Approved articles table will go here
-					</p>
-				</div>
+				<h2 className="text-title-md font-semibold text-gray-800 dark:text-white/90">
+					Approved Articles ({approvedArticlesArray?.length || 0})
+				</h2>
+				<TableApprovedArticles
+					data={approvedArticlesArray || []}
+					onOpenReferenceNumberModal={(article) => {
+						setSelectedArticle(article);
+						// TODO: setIsOpenModalArticleReferenceNumber(true);
+						console.log("Open reference number modal for article:", article.id);
+					}}
+					onOpenRejectedModal={(article) => {
+						setSelectedArticle(article);
+						// TODO: setIsOpenModalReportRejected(true);
+						console.log("Open rejected modal for article:", article.id);
+					}}
+					onToggleStage={(articleId) => {
+						const updatedArray = approvedArticlesArray.map((article) =>
+							article.id === articleId
+								? {
+										...article,
+										stageArticleForReport: !article.stageArticleForReport,
+								  }
+								: article
+						);
+						dispatch(updateApprovedArticlesArray(updatedArray));
+					}}
+				/>
 			</div>
 		</div>
 	);
