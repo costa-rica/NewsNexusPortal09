@@ -3,6 +3,8 @@ import React, { useState, useEffect } from "react";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import { updateApprovedArticlesArray } from "@/store/features/user/userSlice";
 import TableReportsWeeklyCpsc from "@/components/tables/TableReportsWeeklyCpsc";
+import TableReportWeeklyCpscStagedArticles from "@/components/tables/TableReportWeeklyCpscStagedArticles";
+import { ApprovedArticle } from "@/types/article";
 
 export default function WeeklyCpsc() {
 	const dispatch = useAppDispatch();
@@ -10,17 +12,47 @@ export default function WeeklyCpsc() {
 		(state) => state.user
 	);
 	const [reportsArray, setReportsArray] = useState([]);
-	const [selectedReport, setSelectedReport] = useState(null);
-	const [selectedArticle, setSelectedArticle] = useState(null);
+	const [selectedReport, setSelectedReport] = useState<any>(null);
+	const [selectedArticle, setSelectedArticle] = useState<ApprovedArticle | null>(null);
 	const [loadingReports, setLoadingReports] = useState(false);
 
 	useEffect(() => {
 		fetchReportsArray();
-		// TODO: Fetch approved articles if needed
-		// if (approvedArticlesArray?.length === 0) {
-		// 	fetchApprovedArticlesArray();
-		// }
+		if (approvedArticlesArray?.length === 0) {
+			fetchApprovedArticlesArray();
+		}
 	}, []);
+
+	const fetchApprovedArticlesArray = async () => {
+		try {
+			const response = await fetch(
+				`${process.env.NEXT_PUBLIC_API_BASE_URL}/articles/approved`,
+				{
+					headers: { Authorization: `Bearer ${token}` },
+				}
+			);
+
+			if (!response.ok) {
+				const errorText = await response.text();
+				throw new Error(`Server Error: ${errorText}`);
+			}
+
+			const result = await response.json();
+
+			if (result.articlesArray && Array.isArray(result.articlesArray)) {
+				const tempArray = result.articlesArray.map((article: any) => ({
+					...article,
+					stageArticleForReport: false,
+				}));
+				dispatch(updateApprovedArticlesArray(tempArray));
+			} else {
+				dispatch(updateApprovedArticlesArray([]));
+			}
+		} catch (error) {
+			console.error("Error fetching approved articles:", error);
+			dispatch(updateApprovedArticlesArray([]));
+		}
+	};
 
 	const fetchReportsArray = async () => {
 		setLoadingReports(true);
@@ -212,14 +244,26 @@ export default function WeeklyCpsc() {
 
 				{/* Top Right - Staged Articles Table */}
 				<div className="flex flex-col gap-4">
-					<div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
-						<h2 className="text-title-md font-semibold text-gray-800 dark:text-white/90 mb-4">
-							TableReportWeeklyCpscStagedArticles (count: {stagedArticlesCount})
-						</h2>
-						<p className="text-sm text-gray-600 dark:text-gray-400">
-							Staged articles table will go here
-						</p>
-					</div>
+					<h2 className="text-title-md font-semibold text-gray-800 dark:text-white/90">
+						Staged Articles ({stagedArticlesCount})
+					</h2>
+					<TableReportWeeklyCpscStagedArticles
+						data={
+							approvedArticlesArray?.filter(
+								(article) => article.stageArticleForReport
+							) || []
+						}
+						onOpenReferenceNumberModal={(article) => {
+							setSelectedArticle(article);
+							// TODO: setIsOpenModalArticleReferenceNumber(true);
+							console.log("Open reference number modal for article:", article.id);
+						}}
+						onOpenRejectedModal={(article) => {
+							setSelectedArticle(article);
+							// TODO: setIsOpenModalReportRejected(true);
+							console.log("Open rejected modal for article:", article.id);
+						}}
+					/>
 				</div>
 			</div>
 
