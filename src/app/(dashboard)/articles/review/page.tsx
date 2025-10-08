@@ -37,8 +37,8 @@ export default function ReviewArticles() {
 		useState(true);
 	const [hasFilterChanges, setHasFilterChanges] = useState(false);
 
-	// Track initial filter values to detect changes
-	const [initialFilters] = useState({
+	// Track initial filter values to detect changes - use ref so we can update it
+	const initialFiltersRef = React.useRef({
 		returnOnlyThisPublishedDateOrAfter:
 			userReducer.articleTableBodyParams.returnOnlyThisPublishedDateOrAfter,
 		returnOnlyThisCreatedAtDateOrAfter:
@@ -53,15 +53,15 @@ export default function ReviewArticles() {
 	useEffect(() => {
 		const changed =
 			userReducer.articleTableBodyParams.returnOnlyThisPublishedDateOrAfter !==
-				initialFilters.returnOnlyThisPublishedDateOrAfter ||
+				initialFiltersRef.current.returnOnlyThisPublishedDateOrAfter ||
 			userReducer.articleTableBodyParams.returnOnlyThisCreatedAtDateOrAfter !==
-				initialFilters.returnOnlyThisCreatedAtDateOrAfter ||
+				initialFiltersRef.current.returnOnlyThisCreatedAtDateOrAfter ||
 			userReducer.articleTableBodyParams.returnOnlyIsNotApproved !==
-				initialFilters.returnOnlyIsNotApproved ||
+				initialFiltersRef.current.returnOnlyIsNotApproved ||
 			userReducer.articleTableBodyParams.returnOnlyIsRelevant !==
-				initialFilters.returnOnlyIsRelevant;
+				initialFiltersRef.current.returnOnlyIsRelevant;
 		setHasFilterChanges(changed);
-	}, [userReducer.articleTableBodyParams, initialFilters]);
+	}, [userReducer.articleTableBodyParams]);
 
 	// Transform stateArray for MultiSelect component
 	const stateOptions = stateArray.map((state) => ({
@@ -353,16 +353,113 @@ export default function ReviewArticles() {
 
 	const handleClickIsReviewed = async (articleId: number) => {
 		console.log("Clicked is reviewed for article:", articleId);
-		// TODO: Implement toggle reviewed logic from v08
+		try {
+			const currentArticle = articlesArray.find(
+				(article) => article.id === articleId
+			);
+			if (!currentArticle) return;
+
+			const response = await fetch(
+				`${process.env.NEXT_PUBLIC_API_BASE_URL}/articles/is-being-reviewed/${articleId}`,
+				{
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+						Authorization: `Bearer ${token}`,
+					},
+					body: JSON.stringify({
+						isBeingReviewed: !currentArticle.isBeingReviewed,
+					}),
+				}
+			);
+
+			if (!response.ok) {
+				const errorText = await response.text();
+				throw new Error(`Server Error: ${errorText}`);
+			}
+
+			// Toggle the isBeingReviewed status in the array
+			const updatedArticle = {
+				...currentArticle,
+				isBeingReviewed: !currentArticle.isBeingReviewed,
+			};
+
+			setArticlesArray(
+				articlesArray.map((article) =>
+					article.id === articleId ? updatedArticle : article
+				)
+			);
+
+			// Update selected article if it matches
+			if (selectedArticle?.id === articleId) {
+				setSelectedArticle(updatedArticle);
+			}
+
+			console.log("Successfully toggled isBeingReviewed");
+		} catch (error) {
+			console.error("Error toggling isBeingReviewed:", error);
+		}
 	};
 
 	const handleClickIsRelevant = async (articleId: number) => {
 		console.log("Clicked is relevant for article:", articleId);
-		// TODO: Implement toggle relevant logic from v08
+		try {
+			const response = await fetch(
+				`${process.env.NEXT_PUBLIC_API_BASE_URL}/articles/user-toggle-is-not-relevant/${articleId}`,
+				{
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+						Authorization: `Bearer ${token}`,
+					},
+				}
+			);
+
+			if (!response.ok) {
+				const errorText = await response.text();
+				throw new Error(`Server Error: ${errorText}`);
+			}
+
+			// Toggle the isRelevant status in the array
+			const currentArticle = articlesArray.find(
+				(article) => article.id === articleId
+			);
+			if (!currentArticle) return;
+
+			const updatedArticle = {
+				...currentArticle,
+				isRelevant: !currentArticle.isRelevant,
+			};
+
+			setArticlesArray(
+				articlesArray.map((article) =>
+					article.id === articleId ? updatedArticle : article
+				)
+			);
+
+			// Update selected article if it matches
+			if (selectedArticle?.id === articleId) {
+				setSelectedArticle(updatedArticle);
+			}
+
+			console.log("Successfully toggled isRelevant");
+		} catch (error) {
+			console.error("Error toggling isRelevant:", error);
+		}
 	};
 
 	const handleRefreshWithFilters = () => {
-		// Update initial filters to match current
+		// Update the ref to current filter values
+		initialFiltersRef.current = {
+			returnOnlyThisPublishedDateOrAfter:
+				userReducer.articleTableBodyParams.returnOnlyThisPublishedDateOrAfter,
+			returnOnlyThisCreatedAtDateOrAfter:
+				userReducer.articleTableBodyParams.returnOnlyThisCreatedAtDateOrAfter,
+			returnOnlyIsNotApproved:
+				userReducer.articleTableBodyParams.returnOnlyIsNotApproved,
+			returnOnlyIsRelevant:
+				userReducer.articleTableBodyParams.returnOnlyIsRelevant,
+		};
 		fetchArticlesArray();
 		setHasFilterChanges(false);
 	};
