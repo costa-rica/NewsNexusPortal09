@@ -6,6 +6,8 @@ import TableReportsWeeklyCpsc from "@/components/tables/TableReportsWeeklyCpsc";
 import TableReportWeeklyCpscStagedArticles from "@/components/tables/TableReportWeeklyCpscStagedArticles";
 import TableApprovedArticles from "@/components/tables/TableApprovedArticles";
 import { ApprovedArticle } from "@/types/article";
+import { Modal } from "@/components/ui/modal";
+import { ModalReportDateContent } from "@/components/ui/modal/ModalReportDateContent";
 
 export default function WeeklyCpsc() {
 	const dispatch = useAppDispatch();
@@ -16,6 +18,7 @@ export default function WeeklyCpsc() {
 	const [selectedReport, setSelectedReport] = useState<any>(null);
 	const [selectedArticle, setSelectedArticle] = useState<ApprovedArticle | null>(null);
 	const [loadingReports, setLoadingReports] = useState(false);
+	const [isOpenModalReportDate, setIsOpenModalReportDate] = useState(false);
 
 	useEffect(() => {
 		fetchReportsArray();
@@ -101,8 +104,36 @@ export default function WeeklyCpsc() {
 	// Open date modal for editing submission date
 	const handleOpenDateModal = (report: any) => {
 		setSelectedReport(report);
-		// TODO: setIsOpenModalReportDate(true);
-		console.log("Open date modal for report:", report.id);
+		setIsOpenModalReportDate(true);
+	};
+
+	// Update report submission date
+	const handleUpdateReportDate = async (dateSubmittedToClient: string) => {
+		try {
+			const response = await fetch(
+				`${process.env.NEXT_PUBLIC_API_BASE_URL}/reports/update-submitted-to-client-date/${selectedReport.id}`,
+				{
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+						Authorization: `Bearer ${token}`,
+					},
+					body: JSON.stringify({ dateSubmittedToClient }),
+				}
+			);
+
+			if (!response.ok) {
+				const errorText = await response.text();
+				throw new Error(`Server Error: ${errorText}`);
+			}
+
+			alert("Report date updated successfully!");
+			setIsOpenModalReportDate(false);
+			fetchReportsArray();
+		} catch (error) {
+			console.error("Error updating report date:", error);
+			alert("Error updating report date. Please try again.");
+		}
 	};
 
 	// Download report zip file
@@ -298,6 +329,19 @@ export default function WeeklyCpsc() {
 					}}
 				/>
 			</div>
+
+			{/* Modals */}
+			{isOpenModalReportDate && selectedReport && (
+				<Modal
+					isOpen={isOpenModalReportDate}
+					onClose={() => setIsOpenModalReportDate(false)}
+				>
+					<ModalReportDateContent
+						selectedReport={selectedReport}
+						onSubmit={handleUpdateReportDate}
+					/>
+				</Modal>
+			)}
 		</div>
 	);
 }
