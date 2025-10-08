@@ -17,3 +17,22 @@ export interface Article {
 	semanticRatingMax?: number | string;
 	locationClassifierScore?: number | string;
 }
+
+// Article Report Contract (junction table between articles and reports)
+export interface ArticleReportContract {
+	id: number;
+	articleId: number;
+	reportId: number;
+	articleReferenceNumberInReport: string;
+	isAccepted: boolean;
+	rejectionReason?: string | null;
+}
+
+// Approved Article type for reports page (extends Article with report-specific fields)
+export interface ApprovedArticle extends Article {
+	stageArticleForReport: boolean;
+	isSubmitted?: boolean;
+	stateAbbreviation?: string;
+	articleHasBeenAcceptedByAll?: boolean;
+	ArticleReportContracts: ArticleReportContract[];
+}

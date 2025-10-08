@@ -10,6 +10,7 @@ import {
 	ChevronDownIcon,
 	CloseIcon,
 	DatabaseIcon,
+	FileIcon,
 	GridIcon,
 	HorizontaLDots,
 	ListIcon,
@@ -35,6 +36,13 @@ const navItems: NavItem[] = [
 		icon: <NewspaperIcon />,
 		name: "Articles",
 		subItems: [{ name: "Review", path: "/articles/review", pro: false }],
+	},
+	{
+		icon: <FileIcon />,
+		name: "Reports",
+		subItems: [
+			{ name: "Weekly CPSC Report", path: "/reports/weekly-cpsc", pro: false },
+		],
 	},
 	{
 		name: "Analysis",

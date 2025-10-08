@@ -1,17 +1,239 @@
-import type { Metadata } from "next";
-import React from "react";
-
-export const metadata: Metadata = {
-	title: "Weekly CPSC Report",
-	description: "The weekly CPSC report",
-};
+"use client";
+import React, { useState, useEffect } from "react";
+import { useAppSelector, useAppDispatch } from "@/store/hooks";
+import { updateApprovedArticlesArray } from "@/store/features/user/userSlice";
+import TableReportsWeeklyCpsc from "@/components/tables/TableReportsWeeklyCpsc";
 
 export default function WeeklyCpsc() {
+	const dispatch = useAppDispatch();
+	const { token, approvedArticlesArray } = useAppSelector(
+		(state) => state.user
+	);
+	const [reportsArray, setReportsArray] = useState([]);
+	const [selectedReport, setSelectedReport] = useState(null);
+	const [selectedArticle, setSelectedArticle] = useState(null);
+	const [loadingReports, setLoadingReports] = useState(false);
+
+	useEffect(() => {
+		fetchReportsArray();
+		// TODO: Fetch approved articles if needed
+		// if (approvedArticlesArray?.length === 0) {
+		// 	fetchApprovedArticlesArray();
+		// }
+	}, []);
+
+	const fetchReportsArray = async () => {
+		setLoadingReports(true);
+		try {
+			const response = await fetch(
+				`${process.env.NEXT_PUBLIC_API_BASE_URL}/reports`,
+				{
+					method: "GET",
+					headers: {
+						"Content-Type": "application/json",
+						Authorization: `Bearer ${token}`,
+					},
+				}
+			);
+
+			if (!response.ok) {
+				const errorText = await response.text();
+				throw new Error(`Server Error: ${errorText}`);
+			}
+
+			const resJson = await response.json();
+			setReportsArray(resJson.reportsArrayByCrName || []);
+		} catch (error) {
+			console.error("Error fetching reports:", error);
+			setReportsArray([]);
+		} finally {
+			setLoadingReports(false);
+		}
+	};
+
+	const stagedArticlesCount =
+		approvedArticlesArray?.filter(
+			(article) => article.stageArticleForReport
+		).length || 0;
+
+	// Update staged articles table when a report ID is clicked
+	const handleUpdateStagedArticles = (articleIds: number[]) => {
+		const updatedArray = approvedArticlesArray.map((article) => ({
+			...article,
+			stageArticleForReport: articleIds.includes(article.id),
+		}));
+		dispatch(updateApprovedArticlesArray(updatedArray));
+	};
+
+	// Open date modal for editing submission date
+	const handleOpenDateModal = (report: any) => {
+		setSelectedReport(report);
+		// TODO: setIsOpenModalReportDate(true);
+		console.log("Open date modal for report:", report.id);
+	};
+
+	// Download report zip file
+	const handleDownloadReport = async (reportId: number) => {
+		try {
+			const response = await fetch(
+				`${process.env.NEXT_PUBLIC_API_BASE_URL}/reports/download/${reportId}`,
+				{
+					method: "GET",
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				}
+			);
+
+			if (!response.ok) {
+				const errorText = await response.text();
+				throw new Error(`Server Error: ${errorText}`);
+			}
+
+			// Extract filename from Content-Disposition header
+			const disposition = response.headers.get("Content-Disposition");
+			let filename = "report.zip";
+			if (disposition && disposition.includes("filename=")) {
+				filename = disposition
+					.split("filename=")[1]
+					.replace(/['"]/g, "")
+					.trim();
+			}
+
+			// Download the file
+			const blob = await response.blob();
+			const url = window.URL.createObjectURL(blob);
+			const a = document.createElement("a");
+			a.href = url;
+			a.download = filename;
+			document.body.appendChild(a);
+			a.click();
+			document.body.removeChild(a);
+			window.URL.revokeObjectURL(url);
+		} catch (error) {
+			console.error("Error downloading report:", error);
+			alert("Error downloading report. Please try again.");
+		}
+	};
+
+	// Recreate report (create new version)
+	const handleRecreateReport = async (reportId: number) => {
+		setLoadingReports(true);
+		try {
+			const response = await fetch(
+				`${process.env.NEXT_PUBLIC_API_BASE_URL}/reports/recreate/${reportId}`,
+				{
+					method: "GET",
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				}
+			);
+
+			if (!response.ok) {
+				const errorText = await response.text();
+				throw new Error(`Server Error: ${errorText}`);
+			}
+
+			const resJson = await response.json();
+
+			// Show success message with details
+			alert(
+				`Report ID ${resJson.newReportId} successfully created. This is an updated version of the Report ID ${resJson.originalReportId} submitted on ${resJson.originalReportSubmittedDate}.`
+			);
+
+			// Refresh the reports list
+			fetchReportsArray();
+		} catch (error) {
+			console.error("Error recreating report:", error);
+			alert("Error recreating report. Please try again.");
+		} finally {
+			setLoadingReports(false);
+		}
+	};
+
+	// Delete report
+	const handleDeleteReport = async (report: any) => {
+		if (
+			!window.confirm(
+				"Are you sure you want to delete this report? This action cannot be undone."
+			)
+		) {
+			return;
+		}
+
+		try {
+			const response = await fetch(
+				`${process.env.NEXT_PUBLIC_API_BASE_URL}/reports/${report.id}`,
+				{
+					method: "DELETE",
+					headers: {
+						"Content-Type": "application/json",
+						Authorization: `Bearer ${token}`,
+					},
+				}
+			);
+
+			if (!response.ok) {
+				const errorText = await response.text();
+				throw new Error(`Server Error: ${errorText}`);
+			}
+
+			alert("Report deleted successfully!");
+
+			// Refresh the reports list
+			fetchReportsArray();
+		} catch (error) {
+			console.error("Error deleting report:", error);
+			alert("Error deleting report. Please try again.");
+		}
+	};
+
 	return (
-		<div className="grid grid-cols-12 gap-4 md:gap-6">
+		<div className="flex flex-col gap-4 md:gap-6">
 			<h1 className="text-title-xl text-gray-700 dark:text-gray-300">
-				Weekly CPSC Report
+				Create Report
 			</h1>
+
+			{/* Top Section - Two Tables Side by Side */}
+			<div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+				{/* Top Left - Reports Table */}
+				<div className="flex flex-col gap-4">
+					<TableReportsWeeklyCpsc
+						data={reportsArray}
+						loading={loadingReports}
+						onUpdateStagedArticles={handleUpdateStagedArticles}
+						onOpenDateModal={handleOpenDateModal}
+						onDownloadReport={handleDownloadReport}
+						onRecreateReport={handleRecreateReport}
+						onDeleteReport={handleDeleteReport}
+					/>
+				</div>
+
+				{/* Top Right - Staged Articles Table */}
+				<div className="flex flex-col gap-4">
+					<div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
+						<h2 className="text-title-md font-semibold text-gray-800 dark:text-white/90 mb-4">
+							TableReportWeeklyCpscStagedArticles (count: {stagedArticlesCount})
+						</h2>
+						<p className="text-sm text-gray-600 dark:text-gray-400">
+							Staged articles table will go here
+						</p>
+					</div>
+				</div>
+			</div>
+
+			{/* Bottom Section - Approved Articles Table */}
+			<div className="flex flex-col gap-4">
+				<div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
+					<h2 className="text-title-md font-semibold text-gray-800 dark:text-white/90 mb-4">
+						TableApprovedArticles (count: {approvedArticlesArray?.length || 0})
+					</h2>
+					<p className="text-sm text-gray-600 dark:text-gray-400">
+						Approved articles table will go here
+					</p>
+				</div>
+			</div>
 		</div>
 	);
 }
