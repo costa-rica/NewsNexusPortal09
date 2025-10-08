@@ -9,6 +9,11 @@ import TextArea from "@/components/form/input/TextArea";
 import MultiSelect from "@/components/form/MultiSelect";
 import TableReviewArticles from "@/components/tables/TableReviewArticles";
 import type { Article } from "@/types/article";
+import {
+	toggleHideApproved,
+	toggleHideIrrelevant,
+	updateArticleTableBodyParams,
+} from "@/store/features/user/userSlice";
 
 // export const metadata: Metadata = {
 // 	title: "Review Articles",
@@ -30,6 +35,33 @@ export default function ReviewArticles() {
 	});
 	const [allowUpdateSelectedArticle, setAllowUpdateSelectedArticle] =
 		useState(true);
+	const [hasFilterChanges, setHasFilterChanges] = useState(false);
+
+	// Track initial filter values to detect changes
+	const [initialFilters] = useState({
+		returnOnlyThisPublishedDateOrAfter:
+			userReducer.articleTableBodyParams.returnOnlyThisPublishedDateOrAfter,
+		returnOnlyThisCreatedAtDateOrAfter:
+			userReducer.articleTableBodyParams.returnOnlyThisCreatedAtDateOrAfter,
+		returnOnlyIsNotApproved:
+			userReducer.articleTableBodyParams.returnOnlyIsNotApproved,
+		returnOnlyIsRelevant:
+			userReducer.articleTableBodyParams.returnOnlyIsRelevant,
+	});
+
+	// Check if filters have changed
+	useEffect(() => {
+		const changed =
+			userReducer.articleTableBodyParams.returnOnlyThisPublishedDateOrAfter !==
+				initialFilters.returnOnlyThisPublishedDateOrAfter ||
+			userReducer.articleTableBodyParams.returnOnlyThisCreatedAtDateOrAfter !==
+				initialFilters.returnOnlyThisCreatedAtDateOrAfter ||
+			userReducer.articleTableBodyParams.returnOnlyIsNotApproved !==
+				initialFilters.returnOnlyIsNotApproved ||
+			userReducer.articleTableBodyParams.returnOnlyIsRelevant !==
+				initialFilters.returnOnlyIsRelevant;
+		setHasFilterChanges(changed);
+	}, [userReducer.articleTableBodyParams, initialFilters]);
 
 	// Transform stateArray for MultiSelect component
 	const stateOptions = stateArray.map((state) => ({
@@ -329,6 +361,12 @@ export default function ReviewArticles() {
 		// TODO: Implement toggle relevant logic from v08
 	};
 
+	const handleRefreshWithFilters = () => {
+		// Update initial filters to match current
+		fetchArticlesArray();
+		setHasFilterChanges(false);
+	};
+
 	return (
 		<div className="flex flex-col gap-4 md:gap-6">
 			<h1 className="text-title-xl text-gray-700 dark:text-gray-300">
@@ -448,6 +486,116 @@ export default function ReviewArticles() {
 								Update Content
 							</button>
 						)}
+					</div>
+				</div>
+			</div>
+
+			{/* Filter Controls */}
+			<div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
+				<h3 className="mb-4 text-lg font-semibold text-gray-800 dark:text-white/90">
+					Filter Articles
+				</h3>
+				<div className="flex flex-col gap-4">
+					{/* Date Filters */}
+					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+						{/* Database Date Limit */}
+						<div className="relative group">
+							<label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+								Database Date Limit
+								<span className="ml-1 text-xs text-gray-500 dark:text-gray-500 cursor-help">
+									ⓘ
+								</span>
+							</label>
+							<span className="invisible group-hover:visible absolute left-0 top-full mt-1 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg z-10 max-w-xs whitespace-normal">
+								Limits downloading articles added to the Nexus News Database
+								before this date
+							</span>
+							<Input
+								type="date"
+								value={
+									userReducer.articleTableBodyParams
+										.returnOnlyThisCreatedAtDateOrAfter || ""
+								}
+								onChange={(e) =>
+									dispatch(
+										updateArticleTableBodyParams({
+											returnOnlyThisCreatedAtDateOrAfter: e.target.value || null,
+										})
+									)
+								}
+							/>
+						</div>
+
+						{/* Published Date Limit */}
+						<div className="relative group">
+							<label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+								Published Date Limit
+								<span className="ml-1 text-xs text-gray-500 dark:text-gray-500 cursor-help">
+									ⓘ
+								</span>
+							</label>
+							<span className="invisible group-hover:visible absolute left-0 top-full mt-1 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg z-10 max-w-xs whitespace-normal">
+								Limits downloading articles published before this date
+							</span>
+							<Input
+								type="date"
+								value={
+									userReducer.articleTableBodyParams
+										.returnOnlyThisPublishedDateOrAfter || ""
+								}
+								onChange={(e) =>
+									dispatch(
+										updateArticleTableBodyParams({
+											returnOnlyThisPublishedDateOrAfter: e.target.value || null,
+										})
+									)
+								}
+							/>
+						</div>
+					</div>
+
+					{/* Toggle Buttons and Refresh */}
+					<div className="flex flex-wrap items-center gap-3">
+						{/* Hide Approved Button */}
+						<button
+							onClick={() => dispatch(toggleHideApproved())}
+							className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
+								userReducer.articleTableBodyParams.returnOnlyIsNotApproved
+									? "bg-brand-500 text-white hover:bg-brand-600 dark:bg-brand-600 dark:hover:bg-brand-700"
+									: "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+							}`}
+						>
+							{userReducer.articleTableBodyParams.returnOnlyIsNotApproved
+								? "Show Approved"
+								: "Hide Approved"}
+						</button>
+
+						{/* Hide Irrelevant Button */}
+						<button
+							onClick={() => dispatch(toggleHideIrrelevant())}
+							className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
+								userReducer.articleTableBodyParams.returnOnlyIsRelevant
+									? "bg-brand-500 text-white hover:bg-brand-600 dark:bg-brand-600 dark:hover:bg-brand-700"
+									: "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+							}`}
+						>
+							{userReducer.articleTableBodyParams.returnOnlyIsRelevant
+								? "Show Irrelevant"
+								: "Hide Irrelevant"}
+						</button>
+
+						{/* Refresh Button - lights up when filters change */}
+						<button
+							onClick={handleRefreshWithFilters}
+							disabled={!hasFilterChanges}
+							className={`ml-auto px-6 py-2 text-sm font-medium rounded-lg transition-all ${
+								hasFilterChanges
+									? "bg-green-500 text-white hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 shadow-lg"
+									: "bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-700 dark:text-gray-500"
+							}`}
+						>
+							{hasFilterChanges ? "Refresh with New Filters" : "No Changes"}
+						</button>
 					</div>
 				</div>
 			</div>
