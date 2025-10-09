@@ -11,6 +11,7 @@ import {
 	CloseIcon,
 	DatabaseIcon,
 	FileIcon,
+	GearIcon,
 	GridIcon,
 	HorizontaLDots,
 	ListIcon,
@@ -51,6 +52,11 @@ const navItems: NavItem[] = [
 			{ name: "Request", path: "/analysis/request", pro: false },
 			{ name: "State", path: "/analysis/state", pro: false },
 		],
+	},
+	{
+		icon: <GearIcon />,
+		name: "Settings",
+		path: "/user-settings",
 	},
 ];
 
