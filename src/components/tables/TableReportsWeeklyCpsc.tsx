@@ -10,6 +10,7 @@ import {
 	ColumnDef,
 	PaginationState,
 } from "@tanstack/react-table";
+import { LoadingDots } from "../common/LoadingDots";
 
 interface Report {
 	id: number;
@@ -262,13 +263,7 @@ const TableReportsWeeklyCpsc: React.FC<TableReportsWeeklyCpscProps> = ({
 	if (loading) {
 		return (
 			<div className="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
-				<div className="flex items-center justify-center py-20">
-					<div className="flex gap-2">
-						<div className="w-3 h-3 bg-brand-500 rounded-full animate-[bounce_1s_ease-in-out_0s_infinite]"></div>
-						<div className="w-3 h-3 bg-brand-500 rounded-full animate-[bounce_1s_ease-in-out_0.1s_infinite]"></div>
-						<div className="w-3 h-3 bg-brand-500 rounded-full animate-[bounce_1s_ease-in-out_0.2s_infinite]"></div>
-					</div>
-				</div>
+				<LoadingDots className="py-20" />
 			</div>
 		);
 	}

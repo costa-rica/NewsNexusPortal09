@@ -2,17 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { updateArticlesSummaryStatistics } from "@/store/features/user/userSlice";
-
-// Inline LoadingDots component
-const LoadingDots: React.FC = () => {
-	return (
-		<div className="flex items-center justify-center gap-2 py-20">
-			<div className="w-3 h-3 bg-brand-500 rounded-full animate-[bounce_1s_ease-in-out_0s_infinite]"></div>
-			<div className="w-3 h-3 bg-brand-500 rounded-full animate-[bounce_1s_ease-in-out_0.1s_infinite]"></div>
-			<div className="w-3 h-3 bg-brand-500 rounded-full animate-[bounce_1s_ease-in-out_0.2s_infinite]"></div>
-		</div>
-	);
-};
+import { LoadingDots } from "./LoadingDots";
 
 export const SummaryStatistics: React.FC = () => {
 	const dispatch = useAppDispatch();
@@ -59,7 +49,7 @@ export const SummaryStatistics: React.FC = () => {
 	if (isLoading) {
 		return (
 			<div className="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
-				<LoadingDots />
+				<LoadingDots className="py-20" />
 			</div>
 		);
 	}

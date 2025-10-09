@@ -2,8 +2,10 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useSidebar } from "../context/SidebarContext";
+import { useAppDispatch } from "../store/hooks";
+import { logoutUserFully } from "../store/features/user/userSlice";
 import {
 	BoxCubeIcon,
 	CalenderIcon,
@@ -15,6 +17,7 @@ import {
 	GridIcon,
 	HorizontaLDots,
 	ListIcon,
+	LogoutIcon,
 	NewspaperIcon,
 	PageIcon,
 	PieChartIcon,
@@ -29,6 +32,7 @@ type NavItem = {
 	name: string;
 	icon: React.ReactNode;
 	path?: string;
+	onClick?: () => void;
 	subItems?: { name: string; path: string; pro?: boolean; new?: boolean }[];
 };
 
@@ -58,6 +62,11 @@ const navItems: NavItem[] = [
 		name: "Settings",
 		path: "/user-settings",
 	},
+	{
+		icon: <LogoutIcon />,
+		name: "Logout",
+		onClick: () => {}, // Placeholder - actual handler assigned in renderMenuItems
+	},
 ];
 
 const othersItems: NavItem[] = [
@@ -76,6 +85,13 @@ const AppSidebar: React.FC = () => {
 	const { isExpanded, isMobileOpen, toggleSidebar, toggleMobileSidebar } =
 		useSidebar();
 	const pathname = usePathname();
+	const router = useRouter();
+	const dispatch = useAppDispatch();
+
+	const handleLogout = () => {
+		dispatch(logoutUserFully());
+		router.push("/login");
+	};
 
 	const renderMenuItems = (
 		navItems: NavItem[],
@@ -114,6 +130,18 @@ const AppSidebar: React.FC = () => {
 											: ""
 									}`}
 								/>
+							)}
+						</button>
+					) : nav.onClick ? (
+						<button
+							onClick={nav.name === "Logout" ? handleLogout : nav.onClick}
+							className={`menu-item group menu-item-inactive cursor-pointer`}
+						>
+							<span className="menu-item-icon-inactive">
+								{nav.icon}
+							</span>
+							{(isExpanded || isMobileOpen) && (
+								<span className={`menu-item-text`}>{nav.name}</span>
 							)}
 						</button>
 					) : (

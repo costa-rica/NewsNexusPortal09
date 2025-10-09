@@ -54,6 +54,7 @@ import BellIcon from "./bell.svg";
 import NewspaperIcon from "./newspaper-solid.svg";
 import DatabaseIcon from "./database-solid.svg";
 import GearIcon from "./gear-solid-full.svg";
+import LogoutIcon from "./logout.svg";
 
 export {
 	DownloadIcon,
@@ -112,4 +113,5 @@ export {
 	NewspaperIcon,
 	DatabaseIcon,
 	GearIcon,
+	LogoutIcon,
 };
