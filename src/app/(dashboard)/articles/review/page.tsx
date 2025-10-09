@@ -702,6 +702,8 @@ export default function ReviewArticles() {
 				data={articlesArray}
 				selectedRowId={selectedArticle?.id}
 				loading={loadingComponents.table01}
+				showReviewedColumn={true}
+				showRelevantColumn={true}
 				onSelectArticle={handleSelectArticleFromTable}
 				onToggleReviewed={handleClickIsReviewed}
 				onToggleRelevant={handleClickIsRelevant}

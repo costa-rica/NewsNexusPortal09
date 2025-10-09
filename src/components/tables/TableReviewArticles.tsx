@@ -21,18 +21,30 @@ interface TableReviewArticlesProps {
 	data: Article[];
 	selectedRowId?: number | null;
 	loading?: boolean;
-	onSelectArticle: (article: Article) => void;
-	onToggleReviewed: (articleId: number) => void;
-	onToggleRelevant: (articleId: number) => void;
+
+	// Column visibility options
+	showReviewedColumn?: boolean;
+	showRelevantColumn?: boolean;
+	showDeleteColumn?: boolean;
+
+	// Handlers
+	onSelectArticle?: (article: Article) => void;
+	onToggleReviewed?: (articleId: number) => void;
+	onToggleRelevant?: (articleId: number) => void;
+	onDeleteArticle?: (article: Article) => void;
 }
 
 const TableReviewArticles: React.FC<TableReviewArticlesProps> = ({
 	data,
 	selectedRowId = null,
 	loading = false,
+	showReviewedColumn = false,
+	showRelevantColumn = false,
+	showDeleteColumn = false,
 	onSelectArticle,
 	onToggleReviewed,
 	onToggleRelevant,
+	onDeleteArticle,
 }) => {
 	const [pagination, setPagination] = useState<PaginationState>({
 		pageIndex: 0,
@@ -45,35 +57,46 @@ const TableReviewArticles: React.FC<TableReviewArticlesProps> = ({
 	const columnHelper = createColumnHelper<Article>();
 
 	const columns = useMemo<ColumnDef<Article, any>[]>(
-		() => [
-			columnHelper.accessor("id", {
-				header: "ID",
-				enableSorting: true,
-				cell: ({ row }) => (
-					<button
-						onClick={() => onSelectArticle(row.original)}
-						className="text-xs text-brand-500 hover:text-brand-600 dark:text-brand-400 dark:hover:text-brand-300"
-					>
-						{row.original.id}
-					</button>
-				),
-			}),
-			columnHelper.accessor("isBeingReviewed", {
-				header: "Watched ?",
-				enableSorting: true,
-				cell: ({ getValue, row }) => (
-					<div className="flex justify-center">
+		() => {
+			const allColumns: ColumnDef<Article, any>[] = [
+				columnHelper.accessor("id", {
+					header: "ID",
+					enableSorting: true,
+					cell: ({ row }) => (
 						<button
-							className={`px-2 py-1 text-xs rounded transition-opacity ${
-								getValue() === false ? "opacity-50" : ""
-							}`}
-							onClick={() => onToggleReviewed(row.original.id)}
+							onClick={() => onSelectArticle?.(row.original)}
+							className="text-xs text-brand-500 hover:text-brand-600 dark:text-brand-400 dark:hover:text-brand-300"
 						>
-							{getValue() === true ? "Yes" : "No"}
+							{row.original.id}
 						</button>
-					</div>
-				),
-			}),
+					),
+				}),
+			];
+
+			// Conditionally add Watched column
+			if (showReviewedColumn) {
+				allColumns.push(
+					columnHelper.accessor("isBeingReviewed", {
+						header: "Watched ?",
+						enableSorting: true,
+						cell: ({ getValue, row }) => (
+							<div className="flex justify-center">
+								<button
+									className={`px-2 py-1 text-xs rounded transition-opacity ${
+										getValue() === false ? "opacity-50" : ""
+									}`}
+									onClick={() => onToggleReviewed?.(row.original.id)}
+								>
+									{getValue() === true ? "Yes" : "No"}
+								</button>
+							</div>
+						),
+					})
+				);
+			}
+
+			// Add common columns
+			allColumns.push(
 			columnHelper.accessor("title", {
 				header: "Title",
 				enableSorting: true,
@@ -121,92 +144,135 @@ const TableReviewArticles: React.FC<TableReviewArticlesProps> = ({
 			columnHelper.accessor("statesStringCommaSeparated", {
 				header: "State",
 				enableSorting: true,
-			}),
-			columnHelper.accessor("isRelevant", {
-				header: "Relevant ?",
-				enableSorting: true,
-				cell: ({ getValue, row }) => (
-					<div className="flex justify-center">
-						<button
-							className={`px-2 py-1 text-xs rounded transition-opacity ${
-								getValue() === false ? "opacity-50" : ""
-							}`}
-							onClick={() => onToggleRelevant(row.original.id)}
-						>
-							{getValue() === true ? "Yes" : "No"}
-						</button>
-					</div>
-				),
-			}),
-			columnHelper.accessor(
-				(row) => row.requestQueryString?.toString() ?? "",
-				{
-					id: "requestQueryString",
-					header: "Request Query String",
-					enableSorting: true,
-					cell: ({ getValue }) => {
-						return <div className="text-xs">{getValue()}</div>;
-					},
-				}
-			),
-			columnHelper.accessor("nameOfOrg", {
-				id: "nameOfOrg",
-				header: "Added by:",
-				enableSorting: true,
-				cell: ({ getValue }) => {
-					return <div className="text-xs">{getValue()}</div>;
-				},
-			}),
-			columnHelper.accessor("semanticRatingMax", {
-				header: "Nexus Semantic Rating",
-				enableSorting: true,
-				cell: ({ getValue }) => {
-					const value = getValue();
-					if (value === "N/A") {
-						return <div className="text-center">N/A</div>;
-					}
-					const normalized = Math.max(0, Math.min(1, Number(value)));
-					const green = Math.floor(normalized * 200);
-					const color = `rgb(${128 - green / 3}, ${green}, ${128 - green / 3})`;
-					const percent = Math.round(normalized * 100);
-					return (
-						<div className="flex justify-center">
-							<span
-								className="flex items-center justify-center w-10 h-10 rounded-full text-xs font-semibold"
-								style={{ backgroundColor: color }}
-							>
-								{percent}%
-							</span>
-						</div>
-					);
-				},
-			}),
-			columnHelper.accessor("locationClassifierScore", {
-				header: "Nexus Location Rating",
-				enableSorting: true,
-				cell: ({ getValue }) => {
-					const value = getValue();
-					if (value === "N/A") {
-						return <div className="text-center">N/A</div>;
-					}
-					const normalized = Math.max(0, Math.min(1, Number(value)));
-					const green = Math.floor(normalized * 200);
-					const color = `rgb(${128 - green / 3}, ${green}, ${128 - green / 3})`;
-					const percent = Math.round(normalized * 100);
-					return (
-						<div className="flex justify-center">
-							<span
-								className="flex items-center justify-center w-10 h-10 rounded-full text-xs font-semibold"
-								style={{ backgroundColor: color }}
-							>
-								{percent}%
-							</span>
-						</div>
-					);
-				},
-			}),
-		],
-		[onSelectArticle, onToggleReviewed, onToggleRelevant]
+			})
+			);
+
+			// Conditionally add Relevant column
+			if (showRelevantColumn) {
+				allColumns.push(
+					columnHelper.accessor("isRelevant", {
+						header: "Relevant ?",
+						enableSorting: true,
+						cell: ({ getValue, row }) => (
+							<div className="flex justify-center">
+								<button
+									className={`px-2 py-1 text-xs rounded transition-opacity ${
+										getValue() === false ? "opacity-50" : ""
+									}`}
+									onClick={() => onToggleRelevant?.(row.original.id)}
+								>
+									{getValue() === true ? "Yes" : "No"}
+								</button>
+							</div>
+						),
+					})
+				);
+			}
+
+			// Conditionally add Delete column
+			if (showDeleteColumn) {
+				allColumns.push(
+					columnHelper.display({
+						id: "delete",
+						header: "Delete",
+						cell: ({ row }) => (
+							<div className="flex justify-center">
+								<button
+									onClick={() => onDeleteArticle?.(row.original)}
+									className="px-3 py-1 text-xs text-white bg-red-500 rounded hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 transition-colors"
+								>
+									Delete
+								</button>
+							</div>
+						),
+					})
+				);
+			}
+
+			// Add remaining common columns (only for review page)
+			if (showReviewedColumn || showRelevantColumn) {
+				allColumns.push(
+					columnHelper.accessor(
+						(row) => row.requestQueryString?.toString() ?? "",
+						{
+							id: "requestQueryString",
+							header: "Request Query String",
+							enableSorting: true,
+							cell: ({ getValue }) => {
+								return <div className="text-xs">{getValue()}</div>;
+							},
+						}
+					),
+					columnHelper.accessor("nameOfOrg", {
+						id: "nameOfOrg",
+						header: "Added by:",
+						enableSorting: true,
+						cell: ({ getValue }) => {
+							return <div className="text-xs">{getValue()}</div>;
+						},
+					}),
+					columnHelper.accessor("semanticRatingMax", {
+						header: "Nexus Semantic Rating",
+						enableSorting: true,
+						cell: ({ getValue }) => {
+							const value = getValue();
+							if (value === "N/A") {
+								return <div className="text-center">N/A</div>;
+							}
+							const normalized = Math.max(0, Math.min(1, Number(value)));
+							const green = Math.floor(normalized * 200);
+							const color = `rgb(${128 - green / 3}, ${green}, ${128 - green / 3})`;
+							const percent = Math.round(normalized * 100);
+							return (
+								<div className="flex justify-center">
+									<span
+										className="flex items-center justify-center w-10 h-10 rounded-full text-xs font-semibold"
+										style={{ backgroundColor: color }}
+									>
+										{percent}%
+									</span>
+								</div>
+							);
+						},
+					}),
+					columnHelper.accessor("locationClassifierScore", {
+						header: "Nexus Location Rating",
+						enableSorting: true,
+						cell: ({ getValue }) => {
+							const value = getValue();
+							if (value === "N/A") {
+								return <div className="text-center">N/A</div>;
+							}
+							const normalized = Math.max(0, Math.min(1, Number(value)));
+							const green = Math.floor(normalized * 200);
+							const color = `rgb(${128 - green / 3}, ${green}, ${128 - green / 3})`;
+							const percent = Math.round(normalized * 100);
+							return (
+								<div className="flex justify-center">
+									<span
+										className="flex items-center justify-center w-10 h-10 rounded-full text-xs font-semibold"
+										style={{ backgroundColor: color }}
+									>
+										{percent}%
+									</span>
+								</div>
+							);
+						},
+					})
+				);
+			}
+
+			return allColumns;
+		},
+		[
+			onSelectArticle,
+			onToggleReviewed,
+			onToggleRelevant,
+			onDeleteArticle,
+			showReviewedColumn,
+			showRelevantColumn,
+			showDeleteColumn,
+		]
 	);
 
 	const table = useReactTable({

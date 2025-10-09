@@ -40,7 +40,10 @@ const navItems: NavItem[] = [
 	{
 		icon: <NewspaperIcon />,
 		name: "Articles",
-		subItems: [{ name: "Review", path: "/articles/review", pro: false }],
+		subItems: [
+			{ name: "Review", path: "/articles/review", pro: false },
+			{ name: "Add / Delete", path: "/articles/add-delete", pro: false },
+		],
 	},
 	{
 		icon: <FileIcon />,
