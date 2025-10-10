@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import { updateStateArray } from "@/store/features/user/userSlice";
 import { SummaryStatistics } from "@/components/common/SummaryStatistics";
@@ -37,12 +37,27 @@ export default function AddDeleteArticle() {
 	});
 	const [loadingTable, setLoadingTable] = useState(false);
 
-	useEffect(() => {
-		fetchArticlesArray();
-		updateStateArrayWithArticleState({ States: [] });
-	}, []);
+	const updateStateArrayWithArticleState = useCallback((article: any) => {
+		if (!article?.States) {
+			const tempStatesArray = stateArray.map((stateObj) => ({
+				...stateObj,
+				selected: false,
+			}));
+			dispatch(updateStateArray(tempStatesArray));
+			return;
+		}
+		const articleStateIds = article.States.map((state: any) => state.id);
+		const tempStatesArray = stateArray.map((stateObj) => {
+			if (articleStateIds.includes(stateObj.id)) {
+				return { ...stateObj, selected: true };
+			} else {
+				return { ...stateObj, selected: false };
+			}
+		});
+		dispatch(updateStateArray(tempStatesArray));
+	}, [dispatch, stateArray]);
 
-	const fetchArticlesArray = async () => {
+	const fetchArticlesArray = useCallback(async () => {
 		if (!token) return;
 
 		try {
@@ -77,27 +92,13 @@ export default function AddDeleteArticle() {
 		} finally {
 			setLoadingTable(false);
 		}
-	};
+	}, [token, articleTableBodyParams]);
 
-	const updateStateArrayWithArticleState = (article: any) => {
-		if (!article?.States) {
-			const tempStatesArray = stateArray.map((stateObj) => ({
-				...stateObj,
-				selected: false,
-			}));
-			dispatch(updateStateArray(tempStatesArray));
-			return;
-		}
-		const articleStateIds = article.States.map((state: any) => state.id);
-		const tempStatesArray = stateArray.map((stateObj) => {
-			if (articleStateIds.includes(stateObj.id)) {
-				return { ...stateObj, selected: true };
-			} else {
-				return { ...stateObj, selected: false };
-			}
-		});
-		dispatch(updateStateArray(tempStatesArray));
-	};
+	useEffect(() => {
+		fetchArticlesArray();
+		updateStateArrayWithArticleState({ States: [] });
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [fetchArticlesArray]);
 
 	const handleAddAndSubmitArticle = async () => {
 		if (!token) return;

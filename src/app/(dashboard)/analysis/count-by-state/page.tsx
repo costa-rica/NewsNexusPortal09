@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useAppSelector } from "@/store/hooks";
 import TableAdaptiveColumnsWithSearch from "@/components/tables/TableAdaptiveColumnsWithSearch";
 import { StateCountData, UnassignedArticle } from "@/types/article";
@@ -15,11 +15,7 @@ export default function CountByStateAnalysis() {
 	>([]);
 	const [loading, setLoading] = useState(false);
 
-	useEffect(() => {
-		fetchApprovedArticleStateCounts();
-	}, []);
-
-	const fetchApprovedArticleStateCounts = async () => {
+	const fetchApprovedArticleStateCounts = useCallback(async () => {
 		setLoading(true);
 		try {
 			const response = await fetch(
@@ -64,7 +60,11 @@ export default function CountByStateAnalysis() {
 		} finally {
 			setLoading(false);
 		}
-	};
+	}, [token]);
+
+	useEffect(() => {
+		fetchApprovedArticleStateCounts();
+	}, [fetchApprovedArticleStateCounts]);
 
 	const downloadTableSpreadsheet = async () => {
 		try {

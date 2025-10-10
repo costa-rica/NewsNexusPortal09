@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import { updateRequestsAnalysisTableBodyParams } from "@/store/features/user/userSlice";
 import TableArticleRequests from "@/components/tables/TableArticleRequests";
@@ -18,11 +18,7 @@ export default function ArticleRequestsAnalysis() {
 	const [dateModified, setDateModified] = useState(false);
 	const [loading, setLoading] = useState(false);
 
-	useEffect(() => {
-		fetchApprovedArticles();
-	}, []);
-
-	const fetchApprovedArticles = async () => {
+	const fetchApprovedArticles = useCallback(async () => {
 		setLoading(true);
 		try {
 			const response = await fetch(
@@ -64,7 +60,11 @@ export default function ArticleRequestsAnalysis() {
 		} finally {
 			setLoading(false);
 		}
-	};
+	}, [token, requestsAnalysisTableBodyParams?.dateRequestsLimit]);
+
+	useEffect(() => {
+		fetchApprovedArticles();
+	}, [fetchApprovedArticles]);
 
 	const downloadTableSpreadsheet = async () => {
 		try {
@@ -164,7 +164,7 @@ export default function ArticleRequestsAnalysis() {
 							</div>
 							{dateModified && (
 								<span className="text-xs text-yellow-600 dark:text-yellow-500">
-									* Click "Refresh" for changes to take effect
+									* Click &quot;Refresh&quot; for changes to take effect
 								</span>
 							)}
 						</div>

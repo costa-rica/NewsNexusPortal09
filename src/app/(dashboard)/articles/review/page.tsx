@@ -1,6 +1,6 @@
 "use client";
 import type { Metadata } from "next";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { SummaryStatistics } from "@/components/common/SummaryStatistics";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { updateStateArray } from "@/store/features/user/userSlice";
@@ -202,7 +202,7 @@ export default function ReviewArticles() {
 		}
 	};
 
-	const fetchArticlesArray = async () => {
+	const fetchArticlesArray = useCallback(async () => {
 		let startTime = null;
 		const bodyParams = {
 			...userReducer.articleTableBodyParams,
@@ -265,11 +265,26 @@ export default function ReviewArticles() {
 			...prev,
 			timeToRenderTable01InSeconds: loadTimeLabel,
 		}));
-	};
+	}, [userReducer.articleTableBodyParams, userReducer.token]);
+
+	const updateStateArrayWithArticleState = useCallback((article: Article) => {
+		if (!article?.States) {
+			return;
+		}
+		const articleStateIds = article.States.map((state) => state.id);
+		const tempStatesArray = userReducer.stateArray.map((stateObj) => {
+			if (articleStateIds.includes(stateObj.id)) {
+				return { ...stateObj, selected: true };
+			} else {
+				return { ...stateObj, selected: false };
+			}
+		});
+		dispatch(updateStateArray(tempStatesArray));
+	}, [dispatch, userReducer.stateArray]);
 
 	useEffect(() => {
 		fetchArticlesArray();
-	}, []);
+	}, [fetchArticlesArray]);
 
 	useEffect(() => {
 		if (!allowUpdateSelectedArticle) return;
@@ -284,22 +299,8 @@ export default function ReviewArticles() {
 			});
 			updateStateArrayWithArticleState(filteredArticles[0]);
 		}
-	}, [articlesArray, userReducer.hideIrrelevant]);
-
-	const updateStateArrayWithArticleState = (article: Article) => {
-		if (!article?.States) {
-			return;
-		}
-		const articleStateIds = article.States.map((state) => state.id);
-		const tempStatesArray = userReducer.stateArray.map((stateObj) => {
-			if (articleStateIds.includes(stateObj.id)) {
-				return { ...stateObj, selected: true };
-			} else {
-				return { ...stateObj, selected: false };
-			}
-		});
-		dispatch(updateStateArray(tempStatesArray));
-	};
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [allowUpdateSelectedArticle, articlesArray, userReducer.hideIrrelevant]);
 
 	const handleSelectArticleFromTable = async (article: Article) => {
 		console.log("Selected article:", article);

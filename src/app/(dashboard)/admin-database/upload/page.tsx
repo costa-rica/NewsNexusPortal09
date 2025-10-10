@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useAppSelector } from "@/store/hooks";
 import TableRowCounts, { RowCount } from "@/components/tables/TableRowCounts";
 
@@ -12,11 +12,7 @@ export default function DatabaseUpload() {
 	const [isUploading, setIsUploading] = useState(false);
 	const [uploadProgress, setUploadProgress] = useState(0);
 
-	useEffect(() => {
-		fetchRowCountsByTable();
-	}, []);
-
-	const fetchRowCountsByTable = async () => {
+	const fetchRowCountsByTable = useCallback(async () => {
 		try {
 			const response = await fetch(
 				`${process.env.NEXT_PUBLIC_API_BASE_URL}/admin-db/db-row-counts-by-table`,
@@ -38,7 +34,11 @@ export default function DatabaseUpload() {
 		} catch (error) {
 			console.error("Error fetching row counts:", error);
 		}
-	};
+	}, [token]);
+
+	useEffect(() => {
+		fetchRowCountsByTable();
+	}, [fetchRowCountsByTable]);
 
 	const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const selectedFile = e.target.files?.[0];

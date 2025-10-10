@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useAppSelector } from "@/store/hooks";
 import TableRowCounts, { RowCount } from "@/components/tables/TableRowCounts";
 import { Modal } from "@/components/ui/modal";
@@ -13,12 +13,7 @@ export default function DatabaseBackup() {
 	>([]);
 	const [isCreatingBackup, setIsCreatingBackup] = useState(false);
 
-	useEffect(() => {
-		fetchBackupList();
-		fetchRowCountsByTable();
-	}, []);
-
-	const fetchBackupList = async () => {
+	const fetchBackupList = useCallback(async () => {
 		try {
 			const response = await fetch(
 				`${process.env.NEXT_PUBLIC_API_BASE_URL}/admin-db/backup-database-list`,
@@ -41,7 +36,7 @@ export default function DatabaseBackup() {
 		} catch (error) {
 			console.error("Error fetching backups:", error);
 		}
-	};
+	}, [token]);
 
 	const createBackup = async () => {
 		setIsCreatingBackup(true);
@@ -100,7 +95,7 @@ export default function DatabaseBackup() {
 		}
 	};
 
-	const fetchRowCountsByTable = async () => {
+	const fetchRowCountsByTable = useCallback(async () => {
 		try {
 			const response = await fetch(
 				`${process.env.NEXT_PUBLIC_API_BASE_URL}/admin-db/db-row-counts-by-table`,
@@ -122,7 +117,12 @@ export default function DatabaseBackup() {
 		} catch (error) {
 			console.error("Error fetching row counts:", error);
 		}
-	};
+	}, [token]);
+
+	useEffect(() => {
+		fetchBackupList();
+		fetchRowCountsByTable();
+	}, [fetchBackupList, fetchRowCountsByTable]);
 
 	const fetchBackupZipFile = async (backup: string) => {
 		try {
