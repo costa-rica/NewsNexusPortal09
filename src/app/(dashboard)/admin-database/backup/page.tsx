@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from "react";
 import { useAppSelector } from "@/store/hooks";
 import TableRowCounts, { RowCount } from "@/components/tables/TableRowCounts";
+import { Modal } from "@/components/ui/modal";
+import { LoadingDots } from "@/components/common/LoadingDots";
 
 export default function DatabaseBackup() {
 	const { token } = useAppSelector((state) => state.user);
@@ -9,6 +11,7 @@ export default function DatabaseBackup() {
 	const [arrayRowCountsByTable, setArrayRowCountsByTable] = useState<
 		RowCount[]
 	>([]);
+	const [isCreatingBackup, setIsCreatingBackup] = useState(false);
 
 	useEffect(() => {
 		fetchBackupList();
@@ -41,6 +44,7 @@ export default function DatabaseBackup() {
 	};
 
 	const createBackup = async () => {
+		setIsCreatingBackup(true);
 		try {
 			const response = await fetch(
 				`${process.env.NEXT_PUBLIC_API_BASE_URL}/admin-db/create-database-backup`,
@@ -63,6 +67,8 @@ export default function DatabaseBackup() {
 		} catch (error) {
 			console.error("Error creating backup:", error);
 			alert("Error creating backup. Please try again.");
+		} finally {
+			setIsCreatingBackup(false);
 		}
 	};
 
@@ -210,6 +216,18 @@ export default function DatabaseBackup() {
 					)}
 				</div>
 			</div>
+
+			{/* Loading Modal */}
+			<Modal
+				isOpen={isCreatingBackup}
+				onClose={() => {}}
+				showCloseButton={false}
+				className="flex items-center justify-center"
+			>
+				<div className="p-12">
+					<LoadingDots size={4} />
+				</div>
+			</Modal>
 		</div>
 	);
 }
