@@ -17,6 +17,9 @@ import type { Article } from "@/types/article";
 import ColumnVisibilityDropdown from "./ColumnVisibilityDropdown";
 import { LoadingDots } from "../common/LoadingDots";
 
+// Create columnHelper outside component for stable reference
+const columnHelper = createColumnHelper<Article>();
+
 interface TableReviewArticlesProps {
 	data: Article[];
 	selectedRowId?: number | null;
@@ -53,8 +56,6 @@ const TableReviewArticles: React.FC<TableReviewArticlesProps> = ({
 	const [sorting, setSorting] = useState<SortingState>([]);
 	const [globalFilter, setGlobalFilter] = useState("");
 	const [columnVisibility, setColumnVisibility] = useState({});
-
-	const columnHelper = createColumnHelper<Article>();
 
 	const columns = useMemo<ColumnDef<Article, unknown>[]>(
 		() => {

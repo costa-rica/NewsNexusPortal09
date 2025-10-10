@@ -16,6 +16,9 @@ import { ApprovedArticle } from "@/types/article";
 import ColumnVisibilityDropdown from "./ColumnVisibilityDropdown";
 import { LoadingDots } from "@/components/common/LoadingDots";
 
+// Create columnHelper outside component for stable reference
+const columnHelper = createColumnHelper<ApprovedArticle>();
+
 interface TableApprovedArticlesProps {
 	data: ApprovedArticle[];
 	loading?: boolean;
@@ -38,8 +41,6 @@ const TableApprovedArticles: React.FC<TableApprovedArticlesProps> = ({
 	const [sorting, setSorting] = useState<SortingState>([]);
 	const [globalFilter, setGlobalFilter] = useState("");
 	const [columnVisibility, setColumnVisibility] = useState({});
-
-	const columnHelper = createColumnHelper<ApprovedArticle>();
 
 	const columns = useMemo<ColumnDef<ApprovedArticle, unknown>[]>(
 		() => [

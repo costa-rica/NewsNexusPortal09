@@ -16,6 +16,9 @@ import { StateCountData } from "@/types/article";
 import ColumnVisibilityDropdown from "./ColumnVisibilityDropdown";
 import { LoadingDots } from "@/components/common/LoadingDots";
 
+// Create columnHelper outside component for stable reference
+const columnHelper = createColumnHelper<StateCountData>();
+
 interface TableAdaptiveColumnsWithSearchProps {
 	data: StateCountData[];
 	loading?: boolean;
@@ -32,8 +35,6 @@ const TableAdaptiveColumnsWithSearch: React.FC<
 	const [sorting, setSorting] = useState<SortingState>([]);
 	const [globalFilter, setGlobalFilter] = useState("");
 	const [columnVisibility, setColumnVisibility] = useState({});
-
-	const columnHelper = createColumnHelper<StateCountData>();
 
 	// Dynamically generate columns from the first data object
 	const columns = useMemo<ColumnDef<StateCountData, unknown>[]>(() => {

@@ -26,6 +26,9 @@ interface ReportGroup {
 	reportsArray: Report[];
 }
 
+// Create columnHelper outside component for stable reference
+const columnHelper = createColumnHelper<ReportGroup>();
+
 interface TableReportsWeeklyCpscProps {
 	data: ReportGroup[];
 	loading?: boolean;
@@ -63,8 +66,6 @@ const TableReportsWeeklyCpsc: React.FC<TableReportsWeeklyCpscProps> = ({
 	const getLatestReport = (reportGroup: ReportGroup): Report => {
 		return [...reportGroup.reportsArray].sort((a, b) => b.id - a.id)[0];
 	};
-
-	const columnHelper = createColumnHelper<ReportGroup>();
 
 	const columns = useMemo<ColumnDef<ReportGroup, unknown>[]>(
 		() => [

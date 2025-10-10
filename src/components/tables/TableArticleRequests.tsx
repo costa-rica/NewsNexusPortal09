@@ -16,6 +16,9 @@ import { ArticleRequest } from "@/types/article";
 import ColumnVisibilityDropdown from "./ColumnVisibilityDropdown";
 import { LoadingDots } from "@/components/common/LoadingDots";
 
+// Create columnHelper outside component for stable reference
+const columnHelper = createColumnHelper<ArticleRequest>();
+
 interface TableArticleRequestsProps {
 	data: ArticleRequest[];
 	loading?: boolean;
@@ -32,8 +35,6 @@ const TableArticleRequests: React.FC<TableArticleRequestsProps> = ({
 	const [sorting, setSorting] = useState<SortingState>([]);
 	const [globalFilter, setGlobalFilter] = useState("");
 	const [columnVisibility, setColumnVisibility] = useState({});
-
-	const columnHelper = createColumnHelper<ArticleRequest>();
 
 	const columns = useMemo<ColumnDef<ArticleRequest, unknown>[]>(
 		() => [
