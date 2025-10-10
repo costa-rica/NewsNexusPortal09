@@ -1,29 +1,20 @@
 "use client";
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useSidebar } from "../context/SidebarContext";
 import { useAppDispatch } from "../store/hooks";
 import { logoutUserFully } from "../store/features/user/userSlice";
 import {
-	BoxCubeIcon,
-	CalenderIcon,
 	ChevronDownIcon,
 	CloseIcon,
 	DatabaseIcon,
 	FileIcon,
 	GearIcon,
-	GridIcon,
 	HorizontaLDots,
-	ListIcon,
 	LogoutIcon,
 	NewspaperIcon,
-	PageIcon,
 	PieChartIcon,
-	PlugInIcon,
-	TableIcon,
-	UserCircleIcon,
 } from "../icons/index";
 import SidebarWidget from "./SidebarWidget";
 import { ThemeToggleButton } from "../components/common/ThemeToggleButton";

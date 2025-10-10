@@ -1,5 +1,4 @@
 "use client";
-import type { Metadata } from "next";
 import React, { useState, useEffect, useCallback } from "react";
 import { SummaryStatistics } from "@/components/common/SummaryStatistics";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
@@ -15,11 +14,6 @@ import {
 	updateArticleTableBodyParams,
 } from "@/store/features/user/userSlice";
 
-// export const metadata: Metadata = {
-// 	title: "Review Articles",
-// 	description: "The articles that need to be reviewed",
-// };
-
 export default function ReviewArticles() {
 	const dispatch = useAppDispatch();
 	const { token, stateArray } = useAppSelector((state) => state.user);
@@ -29,12 +23,7 @@ export default function ReviewArticles() {
 	const [loadingComponents, setLoadingComponents] = useState({
 		table01: false,
 	});
-	const [loadingTimes, setLoadingTimes] = useState({
-		timeToRenderTable01InSeconds: "0 s",
-		timeToRenderResponseFromApiInSeconds: "0 s",
-	});
-	const [allowUpdateSelectedArticle, setAllowUpdateSelectedArticle] =
-		useState(true);
+	const [allowUpdateSelectedArticle] = useState(true);
 	const [hasFilterChanges, setHasFilterChanges] = useState(false);
 
 	// Track initial filter values to detect changes - use ref so we can update it
@@ -203,7 +192,6 @@ export default function ReviewArticles() {
 	};
 
 	const fetchArticlesArray = useCallback(async () => {
-		let startTime = null;
 		const bodyParams = {
 			...userReducer.articleTableBodyParams,
 			// entityWhoCategorizesIdSemantic: 1,
@@ -237,15 +225,8 @@ export default function ReviewArticles() {
 			const result = await response.json();
 			console.log("Fetched Data:", result);
 
-			startTime = Date.now();
 			if (result.articlesArray && Array.isArray(result.articlesArray)) {
 				setArticlesArray(result.articlesArray);
-				setLoadingTimes((prev) => ({
-					...prev,
-					timeToRenderResponseFromApiInSeconds: `${result.timeToRenderResponseFromApiInSeconds.toFixed(
-						1
-					)} s`,
-				}));
 			} else {
 				setArticlesArray([]);
 			}
@@ -256,14 +237,6 @@ export default function ReviewArticles() {
 		setLoadingComponents((prev) => ({
 			...prev,
 			table01: false,
-		}));
-
-		const loadTimeLabel = `${
-			startTime ? ((Date.now() - startTime) / 1000).toFixed(1) : 0
-		} s`;
-		setLoadingTimes((prev) => ({
-			...prev,
-			timeToRenderTable01InSeconds: loadTimeLabel,
 		}));
 	}, [userReducer.articleTableBodyParams, userReducer.token]);
 
