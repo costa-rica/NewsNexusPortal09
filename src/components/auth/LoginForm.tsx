@@ -4,6 +4,7 @@ import Label from "@/components/form/Label";
 import Button from "@/components/ui/button/Button";
 import { EyeCloseIcon, EyeIcon } from "@/icons";
 import Link from "next/link";
+import Image from "next/image";
 import React, { useState, useEffect, useCallback } from "react";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { useRouter } from "next/navigation";
@@ -202,7 +203,9 @@ export default function LoginForm() {
 					</div>
 				</div>
 				<div className="hidden lg:flex items-center justify-center w-full h-full p-10">
-					<img
+					<Image
+						width={1500}
+						height={1500}
 						className="w-full h-full object-contain"
 						src="/images/kmLogo_square1500.png"
 						alt="Km Logo"
