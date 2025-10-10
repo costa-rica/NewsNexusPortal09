@@ -14,6 +14,7 @@ import {
 } from "@tanstack/react-table";
 import { ApprovedArticle } from "@/types/article";
 import ColumnVisibilityDropdown from "./ColumnVisibilityDropdown";
+import { LoadingDots } from "@/components/common/LoadingDots";
 
 interface TableApprovedArticlesProps {
 	data: ApprovedArticle[];
@@ -185,9 +186,7 @@ const TableApprovedArticles: React.FC<TableApprovedArticlesProps> = ({
 		return (
 			<div className="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] p-6">
 				<div className="flex items-center justify-center py-8">
-					<div className="text-sm text-gray-500 dark:text-gray-400">
-						Loading...
-					</div>
+					<LoadingDots size={4} />
 				</div>
 			</div>
 		);

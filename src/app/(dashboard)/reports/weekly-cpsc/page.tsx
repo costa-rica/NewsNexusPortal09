@@ -21,6 +21,8 @@ export default function WeeklyCpsc() {
 	const [selectedArticle, setSelectedArticle] =
 		useState<ApprovedArticle | null>(null);
 	const [loadingReports, setLoadingReports] = useState(false);
+	const [isLoadingApprovedArticles, setIsLoadingApprovedArticles] =
+		useState(false);
 	const [isOpenModalReportDate, setIsOpenModalReportDate] = useState(false);
 	const [
 		isOpenModalArticleReferenceNumber,
@@ -39,6 +41,7 @@ export default function WeeklyCpsc() {
 	}, []);
 
 	const fetchApprovedArticlesArray = async () => {
+		setIsLoadingApprovedArticles(true);
 		try {
 			const response = await fetch(
 				`${process.env.NEXT_PUBLIC_API_BASE_URL}/articles/approved`,
@@ -66,6 +69,8 @@ export default function WeeklyCpsc() {
 		} catch (error) {
 			console.error("Error fetching approved articles:", error);
 			dispatch(updateApprovedArticlesArray([]));
+		} finally {
+			setIsLoadingApprovedArticles(false);
 		}
 	};
 
@@ -450,6 +455,7 @@ export default function WeeklyCpsc() {
 
 				<TableApprovedArticles
 					data={approvedArticlesArray || []}
+					loading={isLoadingApprovedArticles}
 					onOpenReferenceNumberModal={(article) => {
 						setSelectedArticle(article);
 						setIsOpenModalArticleReferenceNumber(true);
