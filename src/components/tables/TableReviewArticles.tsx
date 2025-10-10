@@ -56,9 +56,9 @@ const TableReviewArticles: React.FC<TableReviewArticlesProps> = ({
 
 	const columnHelper = createColumnHelper<Article>();
 
-	const columns = useMemo<ColumnDef<Article, any>[]>(
+	const columns = useMemo<ColumnDef<Article, unknown>[]>(
 		() => {
-			const allColumns: ColumnDef<Article, any>[] = [
+			const allColumns: ColumnDef<Article, unknown>[] = [
 				columnHelper.accessor("id", {
 					header: "ID",
 					enableSorting: true,

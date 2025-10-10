@@ -8,6 +8,11 @@ import MultiSelect from "@/components/form/MultiSelect";
 import { Modal } from "@/components/ui/modal";
 import type { Article } from "@/types/article";
 
+interface State {
+	id: number;
+	name: string;
+}
+
 interface NewArticle {
 	id?: number;
 	publicationName?: string;
@@ -15,7 +20,7 @@ interface NewArticle {
 	url?: string;
 	publishedDate?: string;
 	content?: string;
-	States?: any[];
+	States?: State[];
 }
 
 export default function AddDeleteArticle() {
@@ -37,7 +42,7 @@ export default function AddDeleteArticle() {
 	});
 	const [loadingTable, setLoadingTable] = useState(false);
 
-	const updateStateArrayWithArticleState = useCallback((article: any) => {
+	const updateStateArrayWithArticleState = useCallback((article: { States?: State[] }) => {
 		if (!article?.States) {
 			const tempStatesArray = stateArray.map((stateObj) => ({
 				...stateObj,
@@ -46,7 +51,7 @@ export default function AddDeleteArticle() {
 			dispatch(updateStateArray(tempStatesArray));
 			return;
 		}
-		const articleStateIds = article.States.map((state: any) => state.id);
+		const articleStateIds = article.States.map((state) => state.id);
 		const tempStatesArray = stateArray.map((stateObj) => {
 			if (articleStateIds.includes(stateObj.id)) {
 				return { ...stateObj, selected: true };

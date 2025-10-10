@@ -66,7 +66,7 @@ const TableReportsWeeklyCpsc: React.FC<TableReportsWeeklyCpscProps> = ({
 
 	const columnHelper = createColumnHelper<ReportGroup>();
 
-	const columns = useMemo<ColumnDef<ReportGroup, any>[]>(
+	const columns = useMemo<ColumnDef<ReportGroup, unknown>[]>(
 		() => [
 			columnHelper.accessor("crName", {
 				header: "CR Name",

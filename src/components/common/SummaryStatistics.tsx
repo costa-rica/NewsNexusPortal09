@@ -86,11 +86,11 @@ export const SummaryStatistics: React.FC = () => {
 									: "N/A"}
 							</h4>
 							<div className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-								(newly approved:{" "}
-								{articlesSummaryStatistics?.approvedButNotInReportCount != null
-									? articlesSummaryStatistics.approvedButNotInReportCount
-									: "N/A"}
-								)
+								{`(newly approved: ${
+									articlesSummaryStatistics?.approvedButNotInReportCount != null
+										? articlesSummaryStatistics.approvedButNotInReportCount
+										: "N/A"
+								})`}
 							</div>
 						</div>
 					</div>
@@ -122,7 +122,7 @@ export const SummaryStatistics: React.FC = () => {
 							<h4 className="mt-2 font-bold text-gray-800 text-title-sm dark:text-white/90">
 								{articlesSummaryStatistics?.articlesSinceLastThursday20hEst !=
 								null
-									? articlesSummaryStatistics.articlesSinceLastThursday20hEst
+									? articlesSummaryStatistics.articlesSinceLastThursday20hEst.toLocaleString()
 									: "N/A"}
 							</h4>
 						</div>

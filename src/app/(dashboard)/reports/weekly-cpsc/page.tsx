@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import { updateApprovedArticlesArray } from "@/store/features/user/userSlice";
 import TableReportsWeeklyCpsc from "@/components/tables/TableReportsWeeklyCpsc";
@@ -12,13 +12,27 @@ import { ModalArticleReferenceNumberContent } from "@/components/ui/modal/ModalA
 import { ModalArticleRejectionStatus } from "@/components/ui/modal/ModalArticleRejectionStatus";
 import { LoadingDots } from "@/components/common/LoadingDots";
 
+interface Report {
+	id: number;
+	dateSubmittedToClient: string | null;
+	ArticleReportContracts: Array<{
+		articleId: number;
+		articleReferenceNumberInReport: string;
+	}>;
+}
+
+interface ReportGroup {
+	crName: string;
+	reportsArray: Report[];
+}
+
 export default function WeeklyCpsc() {
 	const dispatch = useAppDispatch();
 	const { token, approvedArticlesArray } = useAppSelector(
 		(state) => state.user
 	);
-	const [reportsArray, setReportsArray] = useState([]);
-	const [selectedReport, setSelectedReport] = useState<any>(null);
+	const [reportsArray, setReportsArray] = useState<ReportGroup[]>([]);
+	const [selectedReport, setSelectedReport] = useState<Report | null>(null);
 	const [selectedArticle, setSelectedArticle] =
 		useState<ApprovedArticle | null>(null);
 	const [loadingReports, setLoadingReports] = useState(false);
@@ -35,14 +49,7 @@ export default function WeeklyCpsc() {
 		setIsOpenModalArticleRejectionStatus,
 	] = useState(false);
 
-	useEffect(() => {
-		fetchReportsArray();
-		if (approvedArticlesArray?.length === 0) {
-			fetchApprovedArticlesArray();
-		}
-	}, []);
-
-	const fetchApprovedArticlesArray = async () => {
+	const fetchApprovedArticlesArray = useCallback(async () => {
 		setIsLoadingApprovedArticles(true);
 		try {
 			const response = await fetch(
@@ -60,7 +67,7 @@ export default function WeeklyCpsc() {
 			const result = await response.json();
 
 			if (result.articlesArray && Array.isArray(result.articlesArray)) {
-				const tempArray = result.articlesArray.map((article: any) => ({
+				const tempArray = result.articlesArray.map((article: ApprovedArticle) => ({
 					...article,
 					stageArticleForReport: false,
 				}));
@@ -74,9 +81,9 @@ export default function WeeklyCpsc() {
 		} finally {
 			setIsLoadingApprovedArticles(false);
 		}
-	};
+	}, [dispatch, token]);
 
-	const fetchReportsArray = async () => {
+	const fetchReportsArray = useCallback(async () => {
 		setLoadingReports(true);
 		try {
 			const response = await fetch(
@@ -103,7 +110,15 @@ export default function WeeklyCpsc() {
 		} finally {
 			setLoadingReports(false);
 		}
-	};
+	}, [token]);
+
+	useEffect(() => {
+		fetchReportsArray();
+		if (approvedArticlesArray?.length === 0) {
+			fetchApprovedArticlesArray();
+		}
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [fetchReportsArray, fetchApprovedArticlesArray]);
 
 	const stagedArticlesCount =
 		approvedArticlesArray?.filter((article) => article.stageArticleForReport)
@@ -208,13 +223,15 @@ export default function WeeklyCpsc() {
 	};
 
 	// Open date modal for editing submission date
-	const handleOpenDateModal = (report: any) => {
+	const handleOpenDateModal = (report: Report) => {
 		setSelectedReport(report);
 		setIsOpenModalReportDate(true);
 	};
 
 	// Update report submission date
 	const handleUpdateReportDate = async (dateSubmittedToClient: string) => {
+		if (!selectedReport) return;
+
 		try {
 			const response = await fetch(
 				`${process.env.NEXT_PUBLIC_API_BASE_URL}/reports/update-submitted-to-client-date/${selectedReport.id}`,
@@ -323,7 +340,7 @@ export default function WeeklyCpsc() {
 	};
 
 	// Delete report
-	const handleDeleteReport = async (report: any) => {
+	const handleDeleteReport = async (report: Report) => {
 		if (
 			!window.confirm(
 				"Are you sure you want to delete this report? This action cannot be undone."

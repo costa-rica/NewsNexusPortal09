@@ -143,14 +143,14 @@ export default function DatabaseUpload() {
 						camelCase but that is how the Java Model properties are named.
 					</li>
 					<li>
-						Also, names of files should follow naming conventions found in "Row
-						Counts by Table" (yes, also contrary to db schema). They are the
+						Also, names of files should follow naming conventions found in &quot;Row
+						Counts by Table&quot; (yes, also contrary to db schema). They are the
 						names of the JavaScript Model objects - all singular.
 					</li>
 					<li>
 						If ANY Boolean column is modified, must have complete 0s and 1s for
 						that column ( 0= false, 1=true) i.e. empty row is not false, and db
-						doen't handle it well.
+						doesn&apos;t handle it well.
 					</li>
 				</ul>
 

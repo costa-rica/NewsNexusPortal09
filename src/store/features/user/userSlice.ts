@@ -1,6 +1,7 @@
 // src/store/features/user/userSlice.ts
 
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { ApprovedArticle } from "@/types/article";
 
 export interface RequestTableBodyParams {
 	includeIsFromAutomation: boolean;
@@ -18,18 +19,24 @@ export interface RequestsAnalysisTableBodyParams {
 	dateRequestsLimit: string | null;
 }
 
+export interface StateItem {
+	id: number;
+	name: string;
+	selected: boolean;
+}
+
 export interface UserState {
 	token: string | null;
 	username: string | null;
 	email: string | null;
 	isAdmin: boolean;
-	stateArray: any[];
-	articlesSummaryStatistics: Record<string, any>;
+	stateArray: StateItem[];
+	articlesSummaryStatistics: Record<string, unknown>;
 	hideIrrelevant: boolean;
 	hideApproved?: boolean;
 	requestTableBodyParams: RequestTableBodyParams;
 	articleTableBodyParams: ArticleTableBodyParams;
-	approvedArticlesArray: any[];
+	approvedArticlesArray: ApprovedArticle[];
 	requestsAnalysisTableBodyParams: RequestsAnalysisTableBodyParams;
 }
 
@@ -81,13 +88,13 @@ export const userSlice = createSlice({
 			state.email = null;
 		},
 
-		updateStateArray: (state, action: PayloadAction<any[]>) => {
+		updateStateArray: (state, action: PayloadAction<StateItem[]>) => {
 			state.stateArray = action.payload;
 		},
 
 		updateArticlesSummaryStatistics: (
 			state,
-			action: PayloadAction<Record<string, any>>
+			action: PayloadAction<Record<string, unknown>>
 		) => {
 			state.articlesSummaryStatistics = action.payload;
 		},
@@ -122,7 +129,7 @@ export const userSlice = createSlice({
 			};
 		},
 
-		updateApprovedArticlesArray: (state, action: PayloadAction<any[]>) => {
+		updateApprovedArticlesArray: (state, action: PayloadAction<ApprovedArticle[]>) => {
 			state.approvedArticlesArray = action.payload;
 		},
 

@@ -35,7 +35,7 @@ const TableArticleRequests: React.FC<TableArticleRequestsProps> = ({
 
 	const columnHelper = createColumnHelper<ArticleRequest>();
 
-	const columns = useMemo<ColumnDef<ArticleRequest, any>[]>(
+	const columns = useMemo<ColumnDef<ArticleRequest, unknown>[]>(
 		() => [
 			columnHelper.accessor("id", {
 				header: "ID",
@@ -163,11 +163,7 @@ const TableArticleRequests: React.FC<TableArticleRequestsProps> = ({
 							</button>
 						))}
 					</div>
-					<ColumnVisibilityDropdown
-						table={table}
-						columnVisibility={columnVisibility}
-						setColumnVisibility={setColumnVisibility}
-					/>
+					<ColumnVisibilityDropdown table={table} />
 				</div>
 				<div className="flex items-center gap-2">
 					<input

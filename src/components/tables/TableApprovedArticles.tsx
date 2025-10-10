@@ -41,7 +41,7 @@ const TableApprovedArticles: React.FC<TableApprovedArticlesProps> = ({
 
 	const columnHelper = createColumnHelper<ApprovedArticle>();
 
-	const columns = useMemo<ColumnDef<ApprovedArticle, any>[]>(
+	const columns = useMemo<ColumnDef<ApprovedArticle, unknown>[]>(
 		() => [
 			columnHelper.accessor("id", {
 				header: "ID",
@@ -223,8 +223,6 @@ const TableApprovedArticles: React.FC<TableApprovedArticlesProps> = ({
 					</div>
 					<ColumnVisibilityDropdown
 						table={table}
-						columnVisibility={columnVisibility}
-						setColumnVisibility={setColumnVisibility}
 					/>
 				</div>
 				<div className="flex items-center gap-2">

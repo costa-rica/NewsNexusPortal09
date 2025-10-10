@@ -5,7 +5,7 @@ import Label from "@/components/form/Label";
 import Button from "@/components/ui/button/Button";
 import { ChevronLeftIcon, EyeCloseIcon, EyeIcon } from "@/icons";
 import Link from "next/link";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { useRouter } from "next/navigation";
@@ -28,14 +28,7 @@ export default function LoginForm() {
 	// const userReducer = useSelector((state) => state.user);
 	const userReducer = useAppSelector((s) => s.user);
 
-	useEffect(() => {
-		// Only fetch if stateArray is empty
-		if (userReducer.stateArray.length === 0) {
-			fetchStateArray();
-		}
-	}, []);
-
-	const fetchStateArray = async () => {
+	const fetchStateArray = useCallback(async () => {
 		try {
 			const response = await fetch(
 				`${process.env.NEXT_PUBLIC_API_BASE_URL}/states`
@@ -52,7 +45,7 @@ export default function LoginForm() {
 			console.log("Fetched Data (states):", result);
 
 			if (result.statesArray && Array.isArray(result.statesArray)) {
-				const tempStatesArray = result.statesArray.map((stateObj: any) => ({
+				const tempStatesArray = result.statesArray.map((stateObj: { id: number; name: string }) => ({
 					...stateObj,
 					selected: false,
 				}));
@@ -63,7 +56,15 @@ export default function LoginForm() {
 		} catch (error) {
 			console.error("Error fetching states:", error);
 		}
-	};
+	}, [dispatch]);
+
+	useEffect(() => {
+		// Only fetch if stateArray is empty
+		if (userReducer.stateArray.length === 0) {
+			fetchStateArray();
+		}
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [fetchStateArray]);
 
 	const handleClickLogin = async () => {
 		console.log(

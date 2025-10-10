@@ -36,7 +36,7 @@ const TableAdaptiveColumnsWithSearch: React.FC<
 	const columnHelper = createColumnHelper<StateCountData>();
 
 	// Dynamically generate columns from the first data object
-	const columns = useMemo<ColumnDef<StateCountData, any>[]>(() => {
+	const columns = useMemo<ColumnDef<StateCountData, unknown>[]>(() => {
 		if (!data || data.length === 0) return [];
 
 		return Object.keys(data[0]).map((key) =>
@@ -117,11 +117,7 @@ const TableAdaptiveColumnsWithSearch: React.FC<
 							))}
 						</div>
 					)}
-					<ColumnVisibilityDropdown
-						table={table}
-						columnVisibility={columnVisibility}
-						setColumnVisibility={setColumnVisibility}
-					/>
+					<ColumnVisibilityDropdown table={table} />
 				</div>
 				<div className="flex items-center gap-2">
 					<input
