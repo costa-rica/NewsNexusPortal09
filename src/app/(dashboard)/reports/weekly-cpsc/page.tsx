@@ -10,6 +10,7 @@ import { Modal } from "@/components/ui/modal";
 import { ModalReportDateContent } from "@/components/ui/modal/ModalReportDateContent";
 import { ModalArticleReferenceNumberContent } from "@/components/ui/modal/ModalArticleReferenceNumberContent";
 import { ModalArticleRejectionStatus } from "@/components/ui/modal/ModalArticleRejectionStatus";
+import { LoadingDots } from "@/components/common/LoadingDots";
 
 export default function WeeklyCpsc() {
 	const dispatch = useAppDispatch();
@@ -23,6 +24,7 @@ export default function WeeklyCpsc() {
 	const [loadingReports, setLoadingReports] = useState(false);
 	const [isLoadingApprovedArticles, setIsLoadingApprovedArticles] =
 		useState(false);
+	const [isCreatingReport, setIsCreatingReport] = useState(false);
 	const [isOpenModalReportDate, setIsOpenModalReportDate] = useState(false);
 	const [
 		isOpenModalArticleReferenceNumber,
@@ -163,6 +165,7 @@ export default function WeeklyCpsc() {
 			return;
 		}
 
+		setIsCreatingReport(true);
 		setLoadingReports(true);
 		const articlesIdArrayForReport = approvedArticlesArray
 			.filter((article) => article.stageArticleForReport)
@@ -200,6 +203,7 @@ export default function WeeklyCpsc() {
 			alert("Error creating report. Please try again.");
 		} finally {
 			setLoadingReports(false);
+			setIsCreatingReport(false);
 		}
 	};
 
@@ -518,6 +522,18 @@ export default function WeeklyCpsc() {
 					/>
 				</Modal>
 			)}
+
+			{/* Loading Modal for Create Report */}
+			<Modal
+				isOpen={isCreatingReport}
+				onClose={() => {}}
+				showCloseButton={false}
+				className="flex items-center justify-center"
+			>
+				<div className="p-12">
+					<LoadingDots size={4} />
+				</div>
+			</Modal>
 		</div>
 	);
 }
