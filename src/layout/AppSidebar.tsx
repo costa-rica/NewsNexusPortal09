@@ -56,8 +56,8 @@ const navItems: NavItem[] = [
 		name: "Analysis",
 		icon: <PieChartIcon />,
 		subItems: [
-			{ name: "Request", path: "/analysis/request", pro: false },
-			{ name: "State", path: "/analysis/state", pro: false },
+			{ name: "Article Request", path: "/analysis/article-requests", pro: false },
+			{ name: "Count by State", path: "/analysis/count-by-state", pro: false },
 		],
 	},
 	{
