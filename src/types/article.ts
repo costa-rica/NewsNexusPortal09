@@ -47,3 +47,13 @@ export interface ArticleRequest {
 	includeOrExcludeDomainsString?: string;
 	countOfApprovedArticles: number;
 }
+
+// Unassigned article type for count by state analysis
+export interface UnassignedArticle {
+	id: number;
+	title: string;
+	url: string;
+}
+
+// State count data type - uses Record for dynamic column keys
+export type StateCountData = Record<string, string | number>;
