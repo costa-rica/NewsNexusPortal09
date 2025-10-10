@@ -36,3 +36,14 @@ export interface ApprovedArticle extends Article {
 	articleHasBeenAcceptedByAll?: boolean;
 	ArticleReportContracts: ArticleReportContract[];
 }
+
+// Request type for article requests analysis page
+export interface ArticleRequest {
+	id: number;
+	nameOfOrg: string;
+	andString: string;
+	orString?: string;
+	notString?: string;
+	includeOrExcludeDomainsString?: string;
+	countOfApprovedArticles: number;
+}
