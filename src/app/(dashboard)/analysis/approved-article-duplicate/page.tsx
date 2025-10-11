@@ -1,6 +1,9 @@
 "use client";
 import React, { useState, useEffect, useCallback } from "react";
 import { useAppSelector } from "@/store/hooks";
+import TableReportsWeeklyCpscSelectableRows, {
+	Report,
+} from "@/components/tables/TableReportsWeeklyCpscSelectableRows";
 
 interface JobListStatusResponse {
 	jobs: Array<{
@@ -13,6 +16,11 @@ interface ArticleDuplicateAnalysesStatusResponse {
 	reportId: number | null;
 }
 
+interface ReportGroup {
+	crName: string;
+	reportsArray: Report[];
+}
+
 export default function ApprovedArticleDuplicate() {
 	const { token } = useAppSelector((state) => state.user);
 
@@ -21,6 +29,9 @@ export default function ApprovedArticleDuplicate() {
 	const [articleDuplicateAnalysesTableReportId, setArticleDuplicateAnalysesTableReportId] =
 		useState<number | null>(null);
 	const [thresholdPercentage, setThresholdPercentage] = useState<string>("70");
+	const [reportsArray, setReportsArray] = useState<ReportGroup[]>([]);
+	const [loadingReports, setLoadingReports] = useState(false);
+	const [selectedReportId, setSelectedReportId] = useState<number | null>(null);
 
 	// Fetch job list status
 	const fetchJobListStatus = useCallback(async () => {
@@ -81,11 +92,69 @@ export default function ApprovedArticleDuplicate() {
 		}
 	}, [token]);
 
+	// Fetch reports array
+	const fetchReportsArray = useCallback(async () => {
+		setLoadingReports(true);
+		try {
+			const response = await fetch(
+				`${process.env.NEXT_PUBLIC_API_BASE_URL}/reports`,
+				{
+					method: "GET",
+					headers: {
+						"Content-Type": "application/json",
+						Authorization: `Bearer ${token}`,
+					},
+				}
+			);
+
+			if (!response.ok) {
+				const errorText = await response.text();
+				throw new Error(`Server Error: ${errorText}`);
+			}
+
+			const resJson = await response.json();
+
+			// Add selected property to each report
+			const reportsWithSelection = (resJson.reportsArrayByCrName || []).map(
+				(group: ReportGroup) => ({
+					...group,
+					reportsArray: group.reportsArray.map((report: Report) => ({
+						...report,
+						selected: false,
+					})),
+				})
+			);
+
+			setReportsArray(reportsWithSelection);
+		} catch (error) {
+			console.error("Error fetching reports:", error);
+			setReportsArray([]);
+		} finally {
+			setLoadingReports(false);
+		}
+	}, [token]);
+
 	// Initial API calls on mount
 	useEffect(() => {
 		fetchJobListStatus();
 		fetchArticleDuplicateAnalysesStatus();
-	}, [fetchJobListStatus, fetchArticleDuplicateAnalysesStatus]);
+		fetchReportsArray();
+	}, [fetchJobListStatus, fetchArticleDuplicateAnalysesStatus, fetchReportsArray]);
+
+	// Handle row selection
+	const handleRowSelect = (reportId: number) => {
+		// Update selected state for all reports
+		const updatedReports = reportsArray.map((group) => ({
+			...group,
+			reportsArray: group.reportsArray.map((report) => ({
+				...report,
+				selected: report.id === reportId,
+			})),
+		}));
+
+		setReportsArray(updatedReports);
+		setSelectedReportId(reportId);
+	};
 
 	// Button handlers (placeholders)
 	const handleRunDuplicateAnalysis = () => {
@@ -164,7 +233,8 @@ export default function ApprovedArticleDuplicate() {
 				<div className="flex items-center gap-4 mb-6">
 					<button
 						onClick={handleRunDuplicateAnalysis}
-						className="px-4 py-2 bg-brand-500 text-white rounded-lg font-medium hover:bg-brand-600 transition-colors dark:bg-brand-600 dark:hover:bg-brand-700"
+						disabled={selectedReportId === null}
+						className="px-4 py-2 bg-brand-500 text-white rounded-lg font-medium hover:bg-brand-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors dark:bg-brand-600 dark:hover:bg-brand-700"
 					>
 						Run Duplicate Analysis
 					</button>
@@ -207,9 +277,11 @@ export default function ApprovedArticleDuplicate() {
 				<h2 className="text-title-md font-semibold text-gray-800 dark:text-white/90">
 					Weekly CPSC Reports
 				</h2>
-				<div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-					<p className="text-gray-500 dark:text-gray-400">Table placeholder</p>
-				</div>
+				<TableReportsWeeklyCpscSelectableRows
+					data={reportsArray}
+					loading={loadingReports}
+					onRowSelect={handleRowSelect}
+				/>
 			</div>
 
 			{/* Bottom Section - Duplicate Analysis Table */}
