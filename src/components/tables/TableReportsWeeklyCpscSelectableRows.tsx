@@ -3,13 +3,11 @@ import React, { useState, useMemo } from "react";
 import {
 	useReactTable,
 	getCoreRowModel,
-	getPaginationRowModel,
 	getFilteredRowModel,
 	getSortedRowModel,
 	flexRender,
 	createColumnHelper,
 	ColumnDef,
-	PaginationState,
 	SortingState,
 } from "@tanstack/react-table";
 import { LoadingDots } from "../common/LoadingDots";
@@ -41,10 +39,6 @@ interface TableReportsWeeklyCpscSelectableRowsProps {
 const TableReportsWeeklyCpscSelectableRows: React.FC<
 	TableReportsWeeklyCpscSelectableRowsProps
 > = ({ data, loading = false, onRowSelect }) => {
-	const [pagination, setPagination] = useState<PaginationState>({
-		pageIndex: 0,
-		pageSize: 10,
-	});
 	const [globalFilter, setGlobalFilter] = useState("");
 	const [sorting, setSorting] = useState<SortingState>([]);
 
@@ -87,18 +81,21 @@ const TableReportsWeeklyCpscSelectableRows: React.FC<
 					);
 				},
 			}),
-			columnHelper.display({
-				id: "articleCount",
-				header: "Article Count",
-				enableSorting: true,
-				cell: ({ row }) => {
-					return (
-						<div className="text-sm text-center text-gray-800 dark:text-gray-200">
-							{row.original.ArticleReportContracts?.length || 0}
-						</div>
-					);
-				},
-			}),
+			columnHelper.accessor(
+				(row) => row.ArticleReportContracts?.length || 0,
+				{
+					id: "articleCount",
+					header: "Article Count",
+					enableSorting: true,
+					cell: ({ getValue }) => {
+						return (
+							<div className="text-sm text-center text-gray-800 dark:text-gray-200">
+								{getValue()}
+							</div>
+						);
+					},
+				}
+			),
 		],
 		[]
 	);
@@ -107,18 +104,14 @@ const TableReportsWeeklyCpscSelectableRows: React.FC<
 		data: flattenedData,
 		columns,
 		getCoreRowModel: getCoreRowModel(),
-		getPaginationRowModel: getPaginationRowModel(),
 		getFilteredRowModel: getFilteredRowModel(),
 		getSortedRowModel: getSortedRowModel(),
 		state: {
-			pagination,
 			globalFilter,
 			sorting,
 		},
-		onPaginationChange: setPagination,
 		onGlobalFilterChange: setGlobalFilter,
 		onSortingChange: setSorting,
-		autoResetPageIndex: false,
 	});
 
 	if (loading) {
@@ -130,77 +123,28 @@ const TableReportsWeeklyCpscSelectableRows: React.FC<
 	}
 
 	return (
-		<div className="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
-			{/* Table Controls */}
-			<div className="flex flex-wrap items-center justify-between gap-4 p-4 border-b border-gray-200 dark:border-gray-800">
-				{/* Show rows */}
-				<div className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-					<span>Show rows:</span>
-					{[5, 10, 20].map((size) => (
-						<button
-							key={size}
-							onClick={() =>
-								setPagination((prev) => ({
-									...prev,
-									pageSize: size,
-									pageIndex: 0,
-								}))
-							}
-							className={`px-3 py-1 rounded ${
-								pagination.pageSize === size
-									? "bg-brand-500 text-white"
-									: "bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
-							}`}
-						>
-							{size}
-						</button>
-					))}
-				</div>
-
-				{/* Search */}
-				<div className="flex-1 max-w-xs">
-					<input
-						type="text"
-						value={globalFilter ?? ""}
-						onChange={(e) => setGlobalFilter(e.target.value)}
-						className="w-full h-9 rounded-lg border border-gray-300 px-3 py-2 text-sm shadow-theme-xs focus:outline-hidden focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
-						placeholder="Search..."
-					/>
-				</div>
-
-				{/* Pagination */}
-				<div className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-					<button
-						onClick={() => table.previousPage()}
-						disabled={!table.getCanPreviousPage()}
-						className="px-3 py-1 rounded bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-gray-800 dark:hover:bg-gray-700"
-					>
-						&lt; Prev
-					</button>
-					<span>
-						Page {table.getState().pagination.pageIndex + 1} of{" "}
-						{table.getPageCount()}
-					</span>
-					<button
-						onClick={() => table.nextPage()}
-						disabled={!table.getCanNextPage()}
-						className="px-3 py-1 rounded bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-gray-800 dark:hover:bg-gray-700"
-					>
-						Next &gt;
-					</button>
-				</div>
+		<div className="flex flex-col max-h-[20rem] rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
+			{/* Search Bar */}
+			<div className="p-4 border-b border-gray-200 dark:border-gray-800 flex-shrink-0">
+				<input
+					type="text"
+					value={globalFilter ?? ""}
+					onChange={(e) => setGlobalFilter(e.target.value)}
+					className="w-full h-9 rounded-lg border border-gray-300 px-3 py-2 text-sm shadow-theme-xs focus:outline-hidden focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+					placeholder="Search..."
+				/>
 			</div>
 
-			{/* Table */}
-			<div className="overflow-x-auto">
+			{/* Table with scrollable body */}
+			<div className="overflow-auto flex-1 min-h-0">
 				<table className="w-full">
-					<thead className="bg-gray-50 dark:bg-gray-800/50">
+					<thead className="bg-gray-50 dark:bg-gray-800/50 sticky top-0 z-10">
 						{table.getHeaderGroups().map((headerGroup) => (
 							<tr key={headerGroup.id}>
 								{headerGroup.headers.map((header) => (
 									<th
 										key={header.id}
-										className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider dark:text-gray-300 cursor-pointer select-none"
+										className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider dark:text-gray-300 cursor-pointer select-none bg-gray-50 dark:bg-gray-800/50"
 										onClick={header.column.getToggleSortingHandler()}
 									>
 										<div className="flex items-center gap-2">
@@ -245,14 +189,14 @@ const TableReportsWeeklyCpscSelectableRows: React.FC<
 						))}
 					</tbody>
 				</table>
-			</div>
 
-			{/* No results message */}
-			{table.getRowModel().rows.length === 0 && (
-				<div className="text-center py-8 text-gray-500 dark:text-gray-400">
-					No reports found
-				</div>
-			)}
+				{/* No results message */}
+				{table.getRowModel().rows.length === 0 && (
+					<div className="text-center py-8 text-gray-500 dark:text-gray-400">
+						No reports found
+					</div>
+				)}
+			</div>
 		</div>
 	);
 };
