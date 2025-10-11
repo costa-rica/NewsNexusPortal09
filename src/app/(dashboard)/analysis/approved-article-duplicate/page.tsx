@@ -29,15 +29,18 @@ export default function ApprovedArticleDuplicate() {
 
 	// State management
 	const [jobsStatus, setJobsStatus] = useState<string>("no jobs");
-	const [articleDuplicateAnalysesTableReportId, setArticleDuplicateAnalysesTableReportId] =
-		useState<number | null>(null);
+	const [
+		articleDuplicateAnalysesTableReportId,
+		setArticleDuplicateAnalysesTableReportId,
+	] = useState<number | null>(null);
 	const [thresholdPercentage, setThresholdPercentage] = useState<string>("70");
 	const [reportsArray, setReportsArray] = useState<ReportGroup[]>([]);
 	const [loadingReports, setLoadingReports] = useState(false);
 	const [selectedReportId, setSelectedReportId] = useState<number | null>(null);
 	const [duplicateAnalysisData, setDuplicateAnalysisData] =
 		useState<ReportArticleDictionary | null>(null);
-	const [loadingDuplicateAnalysis, setLoadingDuplicateAnalysis] = useState(false);
+	const [loadingDuplicateAnalysis, setLoadingDuplicateAnalysis] =
+		useState(false);
 	const [isCreatingAnalysis, setIsCreatingAnalysis] = useState(false);
 
 	// Fetch job list status
@@ -62,7 +65,9 @@ export default function ApprovedArticleDuplicate() {
 			const resJson: JobListStatusResponse = await response.json();
 
 			// Check if any job has status "running"
-			const hasRunningJob = resJson.jobs?.some(job => job.status === "running");
+			const hasRunningJob = resJson.jobs?.some(
+				(job) => job.status === "running"
+			);
 			setJobsStatus(hasRunningJob ? "loading" : "no jobs");
 		} catch (error) {
 			console.error("Error fetching job list status:", error);
@@ -129,7 +134,8 @@ export default function ApprovedArticleDuplicate() {
 				throw new Error(`Server Error: ${errorText}`);
 			}
 
-			const resJson: ArticleDuplicateAnalysesStatusResponse = await response.json();
+			const resJson: ArticleDuplicateAnalysesStatusResponse =
+				await response.json();
 
 			if (resJson.reportId !== null) {
 				setArticleDuplicateAnalysesTableReportId(resJson.reportId);
@@ -188,7 +194,11 @@ export default function ApprovedArticleDuplicate() {
 		fetchJobListStatus();
 		fetchArticleDuplicateAnalysesStatus();
 		fetchReportsArray();
-	}, [fetchJobListStatus, fetchArticleDuplicateAnalysesStatus, fetchReportsArray]);
+	}, [
+		fetchJobListStatus,
+		fetchArticleDuplicateAnalysesStatus,
+		fetchReportsArray,
+	]);
 
 	// Handle row selection
 	const handleRowSelect = (reportId: number) => {
@@ -232,7 +242,9 @@ export default function ApprovedArticleDuplicate() {
 
 			// Note: The actual analysis creation happens on the backend
 			// User will need to refresh or check back later for the table
-			alert("Duplicate analysis has been initiated. Refresh the page to see results.");
+			alert(
+				"Duplicate analysis has been initiated. Refresh the page to see results."
+			);
 		} catch (error) {
 			console.error("Error running duplicate analysis:", error);
 			alert("Error initiating duplicate analysis. Please try again.");
@@ -240,8 +252,44 @@ export default function ApprovedArticleDuplicate() {
 		}
 	};
 
-	const handleDownloadReportSpreadsheet = () => {
-		alert("Download report spreadsheet");
+	const handleDownloadReportSpreadsheet = async () => {
+		try {
+			const response = await fetch(
+				`${process.env.NEXT_PUBLIC_API_BASE_URL}/analysis/download-excel-file/deduper_analysis.xlsx`,
+				{
+					method: "GET",
+					headers: {
+						"Content-Type": "application/json",
+						Authorization: `Bearer ${token}`,
+					},
+				}
+			);
+
+			if (!response.ok) {
+				const errorText = await response.text();
+				throw new Error(`Server Error: ${errorText}`);
+			}
+
+			// Get the blob from the response
+			const blob = await response.blob();
+
+			// Create a temporary URL for the blob
+			const url = window.URL.createObjectURL(blob);
+
+			// Create a temporary link element and trigger download
+			const link = document.createElement("a");
+			link.href = url;
+			link.download = "deduper_analysis.xlsx";
+			document.body.appendChild(link);
+			link.click();
+
+			// Cleanup
+			document.body.removeChild(link);
+			window.URL.revokeObjectURL(url);
+		} catch (error) {
+			console.error("Error downloading report spreadsheet:", error);
+			alert("Error downloading report spreadsheet. Please try again.");
+		}
 	};
 
 	// Handle threshold input change with validation
@@ -293,7 +341,9 @@ export default function ApprovedArticleDuplicate() {
 					{/* Status Information */}
 					<div className="mb-6 space-y-2">
 						<div className="text-base">
-							<span className="text-gray-700 dark:text-gray-300">Current job status: </span>
+							<span className="text-gray-700 dark:text-gray-300">
+								Current job status:{" "}
+							</span>
 							<span className={`font-semibold ${getStatusColor()}`}>
 								{jobsStatus}
 							</span>
@@ -345,7 +395,9 @@ export default function ApprovedArticleDuplicate() {
 								className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500 dark:focus:ring-brand-600"
 								placeholder="70"
 							/>
-							<span className="text-gray-700 dark:text-gray-300 font-medium">%</span>
+							<span className="text-gray-700 dark:text-gray-300 font-medium">
+								%
+							</span>
 						</div>
 						<span className="text-xs text-gray-500 dark:text-gray-400">
 							Enter a value between 0 and 100
@@ -369,25 +421,26 @@ export default function ApprovedArticleDuplicate() {
 			</div>
 
 			{/* Bottom Section - Duplicate Analysis Table */}
-			{articleDuplicateAnalysesTableReportId !== null && !isCreatingAnalysis && (
-				<div className="flex flex-col gap-4">
-					<h2 className="text-title-md font-semibold text-gray-800 dark:text-white/90">
-						Duplicate Analysis Table
-					</h2>
-					{duplicateAnalysisData !== null ? (
-						<TableDuplicateAnalysis
-							data={duplicateAnalysisData}
-							loading={loadingDuplicateAnalysis}
-						/>
-					) : (
-						<div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-							<p className="text-gray-500 dark:text-gray-400">
-								Loading duplicate analysis data...
-							</p>
-						</div>
-					)}
-				</div>
-			)}
+			{articleDuplicateAnalysesTableReportId !== null &&
+				!isCreatingAnalysis && (
+					<div className="flex flex-col gap-4">
+						<h2 className="text-title-md font-semibold text-gray-800 dark:text-white/90">
+							Duplicate Analysis Table
+						</h2>
+						{duplicateAnalysisData !== null ? (
+							<TableDuplicateAnalysis
+								data={duplicateAnalysisData}
+								loading={loadingDuplicateAnalysis}
+							/>
+						) : (
+							<div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+								<p className="text-gray-500 dark:text-gray-400">
+									Loading duplicate analysis data...
+								</p>
+							</div>
+						)}
+					</div>
+				)}
 
 			{/* Creating Analysis Message */}
 			{isCreatingAnalysis && (
