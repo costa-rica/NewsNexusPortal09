@@ -7,7 +7,6 @@ import {
 	getSortedRowModel,
 	flexRender,
 	createColumnHelper,
-	ColumnDef,
 	SortingState,
 } from "@tanstack/react-table";
 import { LoadingDots } from "../common/LoadingDots";
@@ -53,7 +52,7 @@ const TableReportsWeeklyCpscSelectableRows: React.FC<
 		return flattened;
 	}, [data]);
 
-	const columns = useMemo<ColumnDef<Report, unknown>[]>(
+	const columns = useMemo(
 		() => [
 			columnHelper.accessor("id", {
 				header: "Report ID",

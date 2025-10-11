@@ -8,7 +8,6 @@ import {
 	getSortedRowModel,
 	flexRender,
 	createColumnHelper,
-	ColumnDef,
 	PaginationState,
 	SortingState,
 	Row,
@@ -153,7 +152,7 @@ const TableDuplicateAnalysis: React.FC<TableDuplicateAnalysisProps> = ({
 		);
 	};
 
-	const columns = useMemo<ColumnDef<TableRow, unknown>[]>(
+	const columns = useMemo(
 		() => [
 			columnHelper.accessor("articleIdNew", {
 				header: "Article ID New",

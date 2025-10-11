@@ -7,7 +7,6 @@ import {
 	getFilteredRowModel,
 	flexRender,
 	createColumnHelper,
-	ColumnDef,
 	PaginationState,
 } from "@tanstack/react-table";
 import { LoadingDots } from "../common/LoadingDots";
@@ -67,7 +66,7 @@ const TableReportsWeeklyCpsc: React.FC<TableReportsWeeklyCpscProps> = ({
 		return [...reportGroup.reportsArray].sort((a, b) => b.id - a.id)[0];
 	};
 
-	const columns = useMemo<ColumnDef<ReportGroup, unknown>[]>(
+	const columns = useMemo(
 		() => [
 			columnHelper.accessor("crName", {
 				header: "CR Name",

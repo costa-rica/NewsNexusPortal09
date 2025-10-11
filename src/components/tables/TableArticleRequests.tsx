@@ -8,7 +8,6 @@ import {
 	getFilteredRowModel,
 	flexRender,
 	createColumnHelper,
-	ColumnDef,
 	SortingState,
 	PaginationState,
 } from "@tanstack/react-table";
@@ -36,7 +35,7 @@ const TableArticleRequests: React.FC<TableArticleRequestsProps> = ({
 	const [globalFilter, setGlobalFilter] = useState("");
 	const [columnVisibility, setColumnVisibility] = useState({});
 
-	const columns = useMemo<ColumnDef<ArticleRequest, unknown>[]>(
+	const columns = useMemo(
 		() => [
 			columnHelper.accessor("id", {
 				header: "ID",

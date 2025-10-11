@@ -8,7 +8,6 @@ import {
 	getFilteredRowModel,
 	flexRender,
 	createColumnHelper,
-	ColumnDef,
 	SortingState,
 	PaginationState,
 } from "@tanstack/react-table";
@@ -57,9 +56,10 @@ const TableReviewArticles: React.FC<TableReviewArticlesProps> = ({
 	const [globalFilter, setGlobalFilter] = useState("");
 	const [columnVisibility, setColumnVisibility] = useState({});
 
-	const columns = useMemo<ColumnDef<Article, unknown>[]>(
+	const columns = useMemo(
 		() => {
-			const allColumns: ColumnDef<Article, unknown>[] = [
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			const allColumns: any[] = [
 				columnHelper.accessor("id", {
 					header: "ID",
 					enableSorting: true,

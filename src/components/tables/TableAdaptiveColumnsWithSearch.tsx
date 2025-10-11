@@ -8,7 +8,6 @@ import {
 	getFilteredRowModel,
 	flexRender,
 	createColumnHelper,
-	ColumnDef,
 	SortingState,
 	PaginationState,
 } from "@tanstack/react-table";
@@ -37,11 +36,11 @@ const TableAdaptiveColumnsWithSearch: React.FC<
 	const [columnVisibility, setColumnVisibility] = useState({});
 
 	// Dynamically generate columns from the first data object
-	const columns = useMemo<ColumnDef<StateCountData, unknown>[]>(() => {
+	const columns = useMemo(() => {
 		if (!data || data.length === 0) return [];
 
 		return Object.keys(data[0]).map((key) =>
-			columnHelper.accessor(key, {
+			columnHelper.accessor(key as keyof StateCountData, {
 				header: key,
 				enableSorting: true,
 				cell: ({ row }) => (
