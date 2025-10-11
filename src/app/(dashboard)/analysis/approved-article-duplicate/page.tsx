@@ -4,6 +4,9 @@ import { useAppSelector } from "@/store/hooks";
 import TableReportsWeeklyCpscSelectableRows, {
 	Report,
 } from "@/components/tables/TableReportsWeeklyCpscSelectableRows";
+import TableDuplicateAnalysis, {
+	ReportArticleDictionary,
+} from "@/components/tables/TableDuplicateAnalysis";
 
 interface JobListStatusResponse {
 	jobs: Array<{
@@ -32,6 +35,10 @@ export default function ApprovedArticleDuplicate() {
 	const [reportsArray, setReportsArray] = useState<ReportGroup[]>([]);
 	const [loadingReports, setLoadingReports] = useState(false);
 	const [selectedReportId, setSelectedReportId] = useState<number | null>(null);
+	const [duplicateAnalysisData, setDuplicateAnalysisData] =
+		useState<ReportArticleDictionary | null>(null);
+	const [loadingDuplicateAnalysis, setLoadingDuplicateAnalysis] = useState(false);
+	const [isCreatingAnalysis, setIsCreatingAnalysis] = useState(false);
 
 	// Fetch job list status
 	const fetchJobListStatus = useCallback(async () => {
@@ -63,6 +70,46 @@ export default function ApprovedArticleDuplicate() {
 		}
 	}, [token]);
 
+	// Fetch duplicate analysis table data
+	const fetchDuplicateAnalysisTable = useCallback(
+		async (reportId: number) => {
+			setLoadingDuplicateAnalysis(true);
+			try {
+				const thresholdDecimal = parseFloat(thresholdPercentage) / 100;
+
+				const response = await fetch(
+					`${process.env.NEXT_PUBLIC_API_BASE_URL}/deduper/report-checker-table`,
+					{
+						method: "POST",
+						headers: {
+							"Content-Type": "application/json",
+							Authorization: `Bearer ${token}`,
+						},
+						body: JSON.stringify({
+							reportId,
+							embeddingThresholdMinimum: thresholdDecimal,
+							spacerRow: true,
+						}),
+					}
+				);
+
+				if (!response.ok) {
+					const errorText = await response.text();
+					throw new Error(`Server Error: ${errorText}`);
+				}
+
+				const resJson = await response.json();
+				setDuplicateAnalysisData(resJson.reportArticleDictionary || {});
+			} catch (error) {
+				console.error("Error fetching duplicate analysis table:", error);
+				setDuplicateAnalysisData({});
+			} finally {
+				setLoadingDuplicateAnalysis(false);
+			}
+		},
+		[token, thresholdPercentage]
+	);
+
 	// Fetch article duplicate analyses status
 	const fetchArticleDuplicateAnalysesStatus = useCallback(async () => {
 		try {
@@ -86,11 +133,13 @@ export default function ApprovedArticleDuplicate() {
 
 			if (resJson.reportId !== null) {
 				setArticleDuplicateAnalysesTableReportId(resJson.reportId);
+				// Fetch the duplicate analysis table data
+				fetchDuplicateAnalysisTable(resJson.reportId);
 			}
 		} catch (error) {
 			console.error("Error fetching article duplicate analyses status:", error);
 		}
-	}, [token]);
+	}, [token, fetchDuplicateAnalysisTable]);
 
 	// Fetch reports array
 	const fetchReportsArray = useCallback(async () => {
@@ -156,9 +205,16 @@ export default function ApprovedArticleDuplicate() {
 		setSelectedReportId(reportId);
 	};
 
-	// Button handlers (placeholders)
+	// Button handlers
 	const handleRunDuplicateAnalysis = () => {
-		alert("Run Duplicate Analysis");
+		if (selectedReportId === null) return;
+
+		// Hide table and show loading message
+		setIsCreatingAnalysis(true);
+		setDuplicateAnalysisData(null);
+
+		// Note: The actual analysis creation happens on the backend
+		// User will need to refresh or check back later
 	};
 
 	const handleDownloadReportSpreadsheet = () => {
@@ -290,14 +346,39 @@ export default function ApprovedArticleDuplicate() {
 			</div>
 
 			{/* Bottom Section - Duplicate Analysis Table */}
-			<div className="flex flex-col gap-4">
-				<h2 className="text-title-md font-semibold text-gray-800 dark:text-white/90">
-					Duplicate Analysis Table
-				</h2>
-				<div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-					<p className="text-gray-500 dark:text-gray-400">Table placeholder</p>
+			{articleDuplicateAnalysesTableReportId !== null && !isCreatingAnalysis && (
+				<div className="flex flex-col gap-4">
+					<h2 className="text-title-md font-semibold text-gray-800 dark:text-white/90">
+						Duplicate Analysis Table
+					</h2>
+					{duplicateAnalysisData !== null ? (
+						<TableDuplicateAnalysis
+							data={duplicateAnalysisData}
+							loading={loadingDuplicateAnalysis}
+						/>
+					) : (
+						<div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+							<p className="text-gray-500 dark:text-gray-400">
+								Loading duplicate analysis data...
+							</p>
+						</div>
+					)}
 				</div>
-			</div>
+			)}
+
+			{/* Creating Analysis Message */}
+			{isCreatingAnalysis && (
+				<div className="flex flex-col gap-4">
+					<h2 className="text-title-md font-semibold text-gray-800 dark:text-white/90">
+						Duplicate Analysis Table
+					</h2>
+					<div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+						<p className="text-gray-600 dark:text-gray-400">
+							Table is being created. Refresh or return later for table
+						</p>
+					</div>
+				</div>
+			)}
 		</div>
 	);
 }
