@@ -206,15 +206,38 @@ export default function ApprovedArticleDuplicate() {
 	};
 
 	// Button handlers
-	const handleRunDuplicateAnalysis = () => {
+	const handleRunDuplicateAnalysis = async () => {
 		if (selectedReportId === null) return;
 
 		// Hide table and show loading message
 		setIsCreatingAnalysis(true);
 		setDuplicateAnalysisData(null);
 
-		// Note: The actual analysis creation happens on the backend
-		// User will need to refresh or check back later
+		try {
+			const response = await fetch(
+				`${process.env.NEXT_PUBLIC_API_BASE_URL}/deduper/request-job/${selectedReportId}`,
+				{
+					method: "GET",
+					headers: {
+						"Content-Type": "application/json",
+						Authorization: `Bearer ${token}`,
+					},
+				}
+			);
+
+			if (!response.ok) {
+				const errorText = await response.text();
+				throw new Error(`Server Error: ${errorText}`);
+			}
+
+			// Note: The actual analysis creation happens on the backend
+			// User will need to refresh or check back later for the table
+			alert("Duplicate analysis has been initiated. Refresh the page to see results.");
+		} catch (error) {
+			console.error("Error running duplicate analysis:", error);
+			alert("Error initiating duplicate analysis. Please try again.");
+			setIsCreatingAnalysis(false);
+		}
 	};
 
 	const handleDownloadReportSpreadsheet = () => {
