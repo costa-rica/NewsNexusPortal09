@@ -49,6 +49,7 @@ const navItems: NavItem[] = [
 		subItems: [
 			{ name: "Article Request", path: "/analysis/article-requests", pro: false },
 			{ name: "Count by State", path: "/analysis/count-by-state", pro: false },
+			{ name: "Approved Duplicate Analysis", path: "/analysis/approved-article-duplicate", pro: false },
 		],
 	},
 	{
