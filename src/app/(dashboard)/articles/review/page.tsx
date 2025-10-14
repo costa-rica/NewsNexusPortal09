@@ -191,7 +191,7 @@ export default function ReviewArticles() {
 		}
 	};
 
-	const fetchArticlesArray = useCallback(async () => {
+	const fetchArticlesArray = async () => {
 		const bodyParams = {
 			...userReducer.articleTableBodyParams,
 			// entityWhoCategorizesIdSemantic: 1,
@@ -238,26 +238,31 @@ export default function ReviewArticles() {
 			...prev,
 			table01: false,
 		}));
-	}, [userReducer.articleTableBodyParams, userReducer.token]);
+	};
 
-	const updateStateArrayWithArticleState = useCallback((article: Article) => {
-		if (!article?.States) {
-			return;
-		}
-		const articleStateIds = article.States.map((state) => state.id);
-		const tempStatesArray = userReducer.stateArray.map((stateObj) => {
-			if (articleStateIds.includes(stateObj.id)) {
-				return { ...stateObj, selected: true };
-			} else {
-				return { ...stateObj, selected: false };
+	const updateStateArrayWithArticleState = useCallback(
+		(article: Article) => {
+			if (!article?.States) {
+				return;
 			}
-		});
-		dispatch(updateStateArray(tempStatesArray));
-	}, [dispatch, userReducer.stateArray]);
+			const articleStateIds = article.States.map((state) => state.id);
+			const tempStatesArray = userReducer.stateArray.map((stateObj) => {
+				if (articleStateIds.includes(stateObj.id)) {
+					return { ...stateObj, selected: true };
+				} else {
+					return { ...stateObj, selected: false };
+				}
+			});
+			dispatch(updateStateArray(tempStatesArray));
+		},
+		[dispatch, userReducer.stateArray]
+	);
 
+	// Fetch articles only on initial mount
 	useEffect(() => {
 		fetchArticlesArray();
-	}, [fetchArticlesArray]);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
 
 	useEffect(() => {
 		if (!allowUpdateSelectedArticle) return;
@@ -272,7 +277,7 @@ export default function ReviewArticles() {
 			});
 			updateStateArrayWithArticleState(filteredArticles[0]);
 		}
-	// eslint-disable-next-line react-hooks/exhaustive-deps
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [allowUpdateSelectedArticle, articlesArray, userReducer.hideIrrelevant]);
 
 	const handleSelectArticleFromTable = async (article: Article) => {
@@ -590,7 +595,8 @@ export default function ReviewArticles() {
 								onChange={(e) =>
 									dispatch(
 										updateArticleTableBodyParams({
-											returnOnlyThisCreatedAtDateOrAfter: e.target.value || null,
+											returnOnlyThisCreatedAtDateOrAfter:
+												e.target.value || null,
 										})
 									)
 								}
@@ -617,7 +623,8 @@ export default function ReviewArticles() {
 								onChange={(e) =>
 									dispatch(
 										updateArticleTableBodyParams({
-											returnOnlyThisPublishedDateOrAfter: e.target.value || null,
+											returnOnlyThisPublishedDateOrAfter:
+												e.target.value || null,
 										})
 									)
 								}
