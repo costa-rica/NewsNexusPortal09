@@ -98,9 +98,12 @@ export default function ReviewArticles() {
 
 			const result = await response.json();
 			console.log("State validated:", result);
-			// TODO: Show success message
+
+			// Show success alert
+			alert("State successfully validated and updated!");
 		} catch (error) {
 			console.error("Error validating states:", error);
+			alert("Failed to validate state. Please try again.");
 		}
 	};
 
