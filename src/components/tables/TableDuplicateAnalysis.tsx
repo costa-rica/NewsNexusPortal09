@@ -40,7 +40,7 @@ interface ApprovedArticle {
 interface ReportArticleEntry {
 	maxEmbedding: number;
 	articleReferenceNumberInReport: number;
-	newArticleInformation: NewArticleInformation;
+	newArticleInformation: NewArticleInformation | null;
 	approvedArticlesArray: ApprovedArticle[];
 }
 
@@ -90,21 +90,28 @@ const TableDuplicateAnalysis: React.FC<TableDuplicateAnalysisProps> = ({
 		const rows: TableRow[] = [];
 
 		Object.entries(data).forEach(([articleId, entry]) => {
+			// Skip entries where newArticleInformation is null
+			if (!entry.newArticleInformation) {
+				return;
+			}
+
+			// Store in variable so TypeScript knows it's non-null
+			const newArticleInfo = entry.newArticleInformation;
 			const articleIdNew = parseInt(articleId);
 
 			// Create main row
 			const mainRow: TableRow = {
 				articleIdNew,
-				articleReportRefIdNew: entry.newArticleInformation.articleReportRefIdNew,
+				articleReportRefIdNew: newArticleInfo.articleReportRefIdNew,
 				ArticleIdApproved: articleIdNew,
-				articleReportRefIdApproved: entry.newArticleInformation.articleReportRefIdNew,
+				articleReportRefIdApproved: newArticleInfo.articleReportRefIdNew,
 				embeddingSearch: 1.0,
-				headlineForPdfReport: entry.newArticleInformation.headlineForPdfReport,
-				publicationNameForPdfReport: entry.newArticleInformation.publicationNameForPdfReport,
-				publicationDateForPdfReport: entry.newArticleInformation.publicationDateForPdfReport,
-				textForPdfReport: entry.newArticleInformation.textForPdfReport,
-				urlForPdfReport: entry.newArticleInformation.urlForPdfReport,
-				state: entry.newArticleInformation.state,
+				headlineForPdfReport: newArticleInfo.headlineForPdfReport,
+				publicationNameForPdfReport: newArticleInfo.publicationNameForPdfReport,
+				publicationDateForPdfReport: newArticleInfo.publicationDateForPdfReport,
+				textForPdfReport: newArticleInfo.textForPdfReport,
+				urlForPdfReport: newArticleInfo.urlForPdfReport,
+				state: newArticleInfo.state,
 				isMainRow: true,
 				groupId: articleId,
 				subRows: [],
@@ -113,7 +120,7 @@ const TableDuplicateAnalysis: React.FC<TableDuplicateAnalysisProps> = ({
 			// Create sub-rows from approved articles array
 			const subRows: TableRow[] = entry.approvedArticlesArray.map((approved) => ({
 				articleIdNew,
-				articleReportRefIdNew: entry.newArticleInformation.articleReportRefIdNew,
+				articleReportRefIdNew: newArticleInfo.articleReportRefIdNew,
 				ArticleIdApproved: approved.articleIdApproved,
 				articleReportRefIdApproved: approved.articleReportRefIdApproved,
 				embeddingSearch: approved.embeddingSearch,
