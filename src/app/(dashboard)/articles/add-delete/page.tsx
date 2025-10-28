@@ -25,7 +25,7 @@ interface NewArticle {
 
 export default function AddDeleteArticle() {
 	const dispatch = useAppDispatch();
-	const { token, stateArray, articleTableBodyParams } = useAppSelector(
+	const { token, stateArray = [], articleTableBodyParams } = useAppSelector(
 		(state) => state.user
 	);
 

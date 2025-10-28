@@ -16,7 +16,7 @@ import {
 
 export default function ReviewArticles() {
 	const dispatch = useAppDispatch();
-	const { token, stateArray } = useAppSelector((state) => state.user);
+	const { token, stateArray = [] } = useAppSelector((state) => state.user);
 	const [articlesArray, setArticlesArray] = useState<Article[]>([]);
 	const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
 	const userReducer = useAppSelector((s) => s.user);
@@ -29,17 +29,21 @@ export default function ReviewArticles() {
 	// Track initial filter values to detect changes - use ref so we can update it
 	const initialFiltersRef = React.useRef({
 		returnOnlyThisPublishedDateOrAfter:
-			userReducer.articleTableBodyParams.returnOnlyThisPublishedDateOrAfter,
+			userReducer.articleTableBodyParams?.returnOnlyThisPublishedDateOrAfter ?? null,
 		returnOnlyThisCreatedAtDateOrAfter:
-			userReducer.articleTableBodyParams.returnOnlyThisCreatedAtDateOrAfter,
+			userReducer.articleTableBodyParams?.returnOnlyThisCreatedAtDateOrAfter ?? null,
 		returnOnlyIsNotApproved:
-			userReducer.articleTableBodyParams.returnOnlyIsNotApproved,
+			userReducer.articleTableBodyParams?.returnOnlyIsNotApproved ?? true,
 		returnOnlyIsRelevant:
-			userReducer.articleTableBodyParams.returnOnlyIsRelevant,
+			userReducer.articleTableBodyParams?.returnOnlyIsRelevant ?? true,
 	});
 
 	// Check if filters have changed
 	useEffect(() => {
+		if (!userReducer.articleTableBodyParams) {
+			setHasFilterChanges(false);
+			return;
+		}
 		const changed =
 			userReducer.articleTableBodyParams.returnOnlyThisPublishedDateOrAfter !==
 				initialFiltersRef.current.returnOnlyThisPublishedDateOrAfter ||
@@ -203,7 +207,12 @@ export default function ReviewArticles() {
 
 	const fetchArticlesArray = async () => {
 		const bodyParams = {
-			...userReducer.articleTableBodyParams,
+			...(userReducer.articleTableBodyParams || {
+				returnOnlyThisPublishedDateOrAfter: null,
+				returnOnlyThisCreatedAtDateOrAfter: null,
+				returnOnlyIsNotApproved: true,
+				returnOnlyIsRelevant: true,
+			}),
 			// entityWhoCategorizesIdSemantic: 1,
 			semanticScorerEntityName: "NewsNexusSemanticScorer02",
 		};
@@ -252,7 +261,7 @@ export default function ReviewArticles() {
 
 	const updateStateArrayWithArticleState = useCallback(
 		(article: Article) => {
-			if (!article?.States) {
+			if (!article?.States || !userReducer.stateArray) {
 				return;
 			}
 			const articleStateIds = article.States.map((state) => state.id);
@@ -438,6 +447,8 @@ export default function ReviewArticles() {
 	};
 
 	const handleRefreshWithFilters = () => {
+		if (!userReducer.articleTableBodyParams) return;
+
 		// Update the ref to current filter values
 		initialFiltersRef.current = {
 			returnOnlyThisPublishedDateOrAfter:
@@ -600,7 +611,7 @@ export default function ReviewArticles() {
 								type="date"
 								value={
 									userReducer.articleTableBodyParams
-										.returnOnlyThisCreatedAtDateOrAfter || ""
+										?.returnOnlyThisCreatedAtDateOrAfter || ""
 								}
 								onChange={(e) =>
 									dispatch(
@@ -628,7 +639,7 @@ export default function ReviewArticles() {
 								type="date"
 								value={
 									userReducer.articleTableBodyParams
-										.returnOnlyThisPublishedDateOrAfter || ""
+										?.returnOnlyThisPublishedDateOrAfter || ""
 								}
 								onChange={(e) =>
 									dispatch(
@@ -648,12 +659,12 @@ export default function ReviewArticles() {
 						<button
 							onClick={() => dispatch(toggleHideApproved())}
 							className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
-								userReducer.articleTableBodyParams.returnOnlyIsNotApproved
+								userReducer.articleTableBodyParams?.returnOnlyIsNotApproved
 									? "bg-brand-500 text-white hover:bg-brand-600 dark:bg-brand-600 dark:hover:bg-brand-700"
 									: "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
 							}`}
 						>
-							{userReducer.articleTableBodyParams.returnOnlyIsNotApproved
+							{userReducer.articleTableBodyParams?.returnOnlyIsNotApproved
 								? "Show Approved"
 								: "Hide Approved"}
 						</button>
@@ -662,12 +673,12 @@ export default function ReviewArticles() {
 						<button
 							onClick={() => dispatch(toggleHideIrrelevant())}
 							className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
-								userReducer.articleTableBodyParams.returnOnlyIsRelevant
+								userReducer.articleTableBodyParams?.returnOnlyIsRelevant
 									? "bg-brand-500 text-white hover:bg-brand-600 dark:bg-brand-600 dark:hover:bg-brand-700"
 									: "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
 							}`}
 						>
-							{userReducer.articleTableBodyParams.returnOnlyIsRelevant
+							{userReducer.articleTableBodyParams?.returnOnlyIsRelevant
 								? "Show Irrelevant"
 								: "Hide Irrelevant"}
 						</button>

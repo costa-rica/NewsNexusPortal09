@@ -63,8 +63,8 @@ export default function LoginForm() {
 			return;
 		}
 
-		// Only fetch if stateArray is empty
-		if (userReducer.stateArray.length === 0) {
+		// Only fetch if stateArray is empty or undefined
+		if (!userReducer.stateArray || userReducer.stateArray.length === 0) {
 			fetchStateArray();
 		}
 	// eslint-disable-next-line react-hooks/exhaustive-deps
