@@ -29,12 +29,14 @@ npm run lint
 When migrating components from NewsNexus08Portal (v08) to NewsNexusPortal09 (v09), use this scale to assess implementation complexity:
 
 **Rating: 0-10** where:
+
 - **0-2**: Very easy - Minimal changes, fits existing patterns perfectly, 1 new file max
 - **3-5**: Moderate - May need to modify 1-2 existing files, create 1-2 new files, some pattern adjustments
 - **6-8**: Complex - Requires modifying 3+ files, new architectural patterns, significant refactoring
 - **9-10**: Very complex - Major architectural changes, multiple new systems, extensive refactoring
 
 ### Factors That Affect Difficulty:
+
 - Number of new files to create
 - Number of existing files to modify
 - Architectural pattern compatibility
@@ -44,7 +46,9 @@ When migrating components from NewsNexus08Portal (v08) to NewsNexusPortal09 (v09
 - Styling/theme integration complexity
 
 ### Example Assessment:
+
 **SummaryStatistics Component**: Rating 2/10
+
 - ✅ 1 new file (`SummaryStatistics.tsx`)
 - ✅ 0 existing files modified
 - ✅ Redux actions already exist
@@ -59,6 +63,7 @@ When migrating components from NewsNexus08Portal (v08) to NewsNexusPortal09 (v09
 The app uses Next.js App Router with route groups for layout organization:
 
 - **(dashboard)**: Routes wrapped with `AppHeader` + `AppSidebar`. Used for authenticated dashboard pages like `/articles/review`.
+
   - Layout: `src/app/(dashboard)/layout.tsx`
   - Provides sidebar navigation, header, and authenticated UI chrome
   - Uses `SidebarProvider` context for responsive sidebar state
@@ -68,14 +73,13 @@ The app uses Next.js App Router with route groups for layout organization:
   - Provides split-screen auth layout with KM logo on right side
   - Nested `(auth)` route group for auth-specific pages
 
-**Important**: Route groups like `(dashboard)` and `(full-width)` do NOT appear in URLs — they only organize layouts. This replaces the v08 pattern of using `TemplateView.js` for shared navigation.
-
 ### State Management (Redux)
 
 Redux Toolkit is configured in `src/store/index.ts` with `redux-persist` for localStorage persistence:
 
 - **Store setup**: Uses `persistReducer` with `redux-persist/lib/storage`
 - **User slice**: `src/store/features/user/userSlice.ts` manages authentication state and application preferences
+
   - `loginUser`: Sets token, username, email, isAdmin after successful login
   - `logoutUserFully`: Resets all user state completely
   - Article/request filtering params stored in Redux for persistence across sessions
@@ -89,6 +93,7 @@ Redux Toolkit is configured in `src/store/index.ts` with `redux-persist` for loc
 ### Authentication Flow
 
 Login is handled in `src/components/auth/LoginForm.tsx`:
+
 1. User submits email/password
 2. POST to `${NEXT_PUBLIC_API_BASE_URL}/users/login`
 3. On success, dispatch `loginUser(resJson)` to Redux
@@ -96,6 +101,8 @@ Login is handled in `src/components/auth/LoginForm.tsx`:
 5. Token and user data persisted via redux-persist
 
 Logout should use `logoutUserFully` action to clear all state.
+
+- **API integration**: All API calls go through `NEXT_PUBLIC_API_BASE_URL` environment variable
 
 ### SVG Icons
 
@@ -126,20 +133,19 @@ SVG icons in `src/icons/` are imported as React components using `@svgr/webpack`
 - `NEXT_PUBLIC_API_BASE_URL`: Base URL for NewsNexusAPI09 backend
 - `NEXT_PUBLIC_MODE`: Set to "workstation" to prefill login form for development
 
-## Migration from v08
+### TypeScript Configuration
 
-Key differences from NewsNexus08Portal:
+Path alias: `@/*` → `./src/*`
 
-- **No `TemplateView.js`**: Replaced by layout.tsx files in route groups
-- **No `[root_navigator].js` / `[navigator].js`**: File-system routing replaces dynamic navigator components
-- **Redux instead of context**: State management moved from React Context to Redux Toolkit
-- **App Router instead of Pages Router**: Route definitions are folders with `page.tsx`, not files in `pages/`
-- **Server/client separation**: Components must be marked `"use client"` to use hooks, events, or browser APIs
+Example: `import { AppHeader } from "@/layout/AppHeader"`
 
-## Important Notes
+**IMPORTANT: Strict Typing Requirements**
 
-- **Template renaming**: `SignUpForm.tsx` → `RegistrationForm.tsx`, `SignInForm.tsx` → `LoginForm.tsx`
-- **Sidebar placement**: Sidebar is positioned on the RIGHT side of the screen (customization from template)
-- **Logo positioning**: KM logo appears on the right side of auth screens and header
-- **Redux persistence**: User state persists across page refreshes via localStorage
-- **API integration**: All API calls go through `NEXT_PUBLIC_API_BASE_URL` environment variable
+This project enforces strict ESLint rules that **prohibit the use of `any` type**. All code must be properly typed:
+
+- Use explicit types for all function parameters and return values
+- Import proper types from libraries (e.g., `Row<T>` from `@tanstack/react-table`)
+- Avoid `any` type — use specific types, generics, or `unknown` when appropriate
+- The build will fail if ESLint detects `any` types in the code
+
+When adding new code, always ensure proper TypeScript typing to pass `npm run build`.
