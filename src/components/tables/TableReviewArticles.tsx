@@ -131,7 +131,7 @@ const TableReviewArticles: React.FC<TableReviewArticlesProps> = ({
 							<Link
 								href={rawUrl}
 								target="_blank"
-								className="text-brand-500 hover:text-brand-600 dark:text-brand-400"
+								className="text-brand-500 hover:text-brand-600 visited:text-purple-600 dark:text-brand-400 dark:visited:text-purple-400"
 							>
 								{strippedUrl.slice(0, 20)}
 							</Link>
