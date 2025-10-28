@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { SummaryStatistics } from "@/components/common/SummaryStatistics";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { updateStateArray } from "@/store/features/user/userSlice";
@@ -70,6 +70,13 @@ export default function ReviewArticles() {
 		}));
 		dispatch(updateStateArray(updatedStateArray));
 	};
+
+	// Filter articles based on hideIrrelevant setting
+	const filteredArticlesArray = useMemo(() => {
+		return userReducer.hideIrrelevant
+			? articlesArray.filter((article) => article.isRelevant !== false)
+			: articlesArray;
+	}, [articlesArray, userReducer.hideIrrelevant]);
 
 	const handleValidateState = async () => {
 		if (!selectedArticle) return;
@@ -683,7 +690,7 @@ export default function ReviewArticles() {
 
 			{/* Articles Table */}
 			<TableReviewArticles
-				data={articlesArray}
+				data={filteredArticlesArray}
 				selectedRowId={selectedArticle?.id}
 				loading={loadingComponents.table01}
 				showReviewedColumn={true}
