@@ -11,6 +11,7 @@ import { ModalReportDateContent } from "@/components/ui/modal/ModalReportDateCon
 import { ModalArticleReferenceNumberContent } from "@/components/ui/modal/ModalArticleReferenceNumberContent";
 import { ModalArticleRejectionStatus } from "@/components/ui/modal/ModalArticleRejectionStatus";
 import { ModalInformationOk } from "@/components/ui/modal/ModalInformationOk";
+import { ModalInformationYesOrNo } from "@/components/ui/modal/ModalInformationYesOrNo";
 import { LoadingDots } from "@/components/common/LoadingDots";
 
 interface Report {
@@ -60,6 +61,8 @@ export default function WeeklyCpsc() {
 		title: "",
 		message: "",
 	});
+	const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
+	const [reportToDelete, setReportToDelete] = useState<Report | null>(null);
 
 	const fetchApprovedArticlesArray = useCallback(async () => {
 		setIsLoadingApprovedArticles(true);
@@ -390,18 +393,17 @@ export default function WeeklyCpsc() {
 	};
 
 	// Delete report
-	const handleDeleteReport = async (report: Report) => {
-		if (
-			!window.confirm(
-				"Are you sure you want to delete this report? This action cannot be undone."
-			)
-		) {
-			return;
-		}
+	const handleDeleteReport = (report: Report) => {
+		setReportToDelete(report);
+		setShowDeleteConfirmModal(true);
+	};
+
+	const confirmDeleteReport = async () => {
+		if (!reportToDelete) return;
 
 		try {
 			const response = await fetch(
-				`${process.env.NEXT_PUBLIC_API_BASE_URL}/reports/${report.id}`,
+				`${process.env.NEXT_PUBLIC_API_BASE_URL}/reports/${reportToDelete.id}`,
 				{
 					method: "DELETE",
 					headers: {
@@ -433,6 +435,9 @@ export default function WeeklyCpsc() {
 				title: "Error",
 				message: "Error deleting report. Please try again.",
 			});
+		} finally {
+			setShowDeleteConfirmModal(false);
+			setReportToDelete(null);
 		}
 	};
 
@@ -623,6 +628,23 @@ export default function WeeklyCpsc() {
 					message={alertModal.message}
 					variant={alertModal.variant}
 					onClose={() => setAlertModal({ ...alertModal, show: false })}
+				/>
+			</Modal>
+
+			{/* Delete Confirmation Modal */}
+			<Modal
+				isOpen={showDeleteConfirmModal}
+				onClose={() => setShowDeleteConfirmModal(false)}
+				showCloseButton={true}
+			>
+				<ModalInformationYesOrNo
+					title="Delete Report?"
+					message="Are you sure you want to delete this report? This action cannot be undone."
+					onYes={confirmDeleteReport}
+					onClose={() => setShowDeleteConfirmModal(false)}
+					yesButtonText="Yes, Delete"
+					noButtonText="Cancel"
+					yesButtonStyle="danger"
 				/>
 			</Modal>
 		</div>
