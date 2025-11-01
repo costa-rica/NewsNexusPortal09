@@ -271,6 +271,12 @@ export default function AddDeleteArticle() {
 
 			if (response.status !== 200) {
 				console.log(`There was a server error: ${response.status}`);
+				setAlertModal({
+					show: true,
+					variant: "error",
+					title: "Delete Failed",
+					message: `There was a server error: ${response.status}. Unable to delete article.`,
+				});
 				return;
 			}
 
@@ -289,6 +295,12 @@ export default function AddDeleteArticle() {
 			});
 		} catch (error) {
 			console.error("Error deleting article:", error);
+			setAlertModal({
+				show: true,
+				variant: "error",
+				title: "Error",
+				message: "Error deleting article. Please try again.",
+			});
 		} finally {
 			setIsOpenDeleteModal(false);
 			setArticleToDelete(null);
