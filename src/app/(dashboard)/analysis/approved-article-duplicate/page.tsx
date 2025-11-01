@@ -7,6 +7,8 @@ import TableReportsWeeklyCpscSelectableRows, {
 import TableDuplicateAnalysis, {
 	ReportArticleDictionary,
 } from "@/components/tables/TableDuplicateAnalysis";
+import { Modal } from "@/components/ui/modal";
+import { ModalInformationYesOrNo } from "@/components/ui/modal/ModalInformationYesOrNo";
 
 interface JobListStatusResponse {
 	jobs: Array<{
@@ -42,6 +44,7 @@ export default function ApprovedArticleDuplicate() {
 	const [loadingDuplicateAnalysis, setLoadingDuplicateAnalysis] =
 		useState(false);
 	const [isCreatingAnalysis, setIsCreatingAnalysis] = useState(false);
+	const [showConfirmModal, setShowConfirmModal] = useState(false);
 
 	// Fetch job list status
 	const fetchJobListStatus = useCallback(async () => {
@@ -216,7 +219,12 @@ export default function ApprovedArticleDuplicate() {
 	};
 
 	// Button handlers
-	const handleRunDuplicateAnalysis = async () => {
+	const handleRunDuplicateAnalysis = () => {
+		if (selectedReportId === null) return;
+		setShowConfirmModal(true);
+	};
+
+	const confirmRunDuplicateAnalysis = async () => {
 		if (selectedReportId === null) return;
 
 		// Hide table and show loading message
@@ -455,6 +463,23 @@ export default function ApprovedArticleDuplicate() {
 					</div>
 				</div>
 			)}
+
+			{/* Confirmation Modal */}
+			<Modal
+				isOpen={showConfirmModal}
+				onClose={() => setShowConfirmModal(false)}
+				showCloseButton={true}
+			>
+				<ModalInformationYesOrNo
+					title="Are You Sure?"
+					message="This will delete the current duplicate analysis table in the database and create a new one. This process takes approximately 1 hour to complete."
+					onYes={confirmRunDuplicateAnalysis}
+					onClose={() => setShowConfirmModal(false)}
+					yesButtonText="Yes, Run Analysis"
+					noButtonText="Cancel"
+					yesButtonStyle="danger"
+				/>
+			</Modal>
 		</div>
 	);
 }
