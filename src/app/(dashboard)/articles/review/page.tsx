@@ -13,6 +13,8 @@ import {
 	toggleHideIrrelevant,
 	updateArticleTableBodyParams,
 } from "@/store/features/user/userSlice";
+import { Modal } from "@/components/ui/modal";
+import { ModalInformationOk } from "@/components/ui/modal/ModalInformationOk";
 
 export default function ReviewArticles() {
 	const dispatch = useAppDispatch();
@@ -25,6 +27,17 @@ export default function ReviewArticles() {
 	});
 	const [allowUpdateSelectedArticle] = useState(true);
 	const [hasFilterChanges, setHasFilterChanges] = useState(false);
+	const [alertModal, setAlertModal] = useState<{
+		show: boolean;
+		variant: "success" | "error";
+		title: string;
+		message: string;
+	}>({
+		show: false,
+		variant: "success",
+		title: "",
+		message: "",
+	});
 
 	// Track initial filter values to detect changes - use ref so we can update it
 	const initialFiltersRef = React.useRef({
@@ -111,10 +124,20 @@ export default function ReviewArticles() {
 			console.log("State validated:", result);
 
 			// Show success alert
-			alert("State successfully validated and updated!");
+			setAlertModal({
+				show: true,
+				variant: "success",
+				title: "Success",
+				message: "State successfully validated and updated!",
+			});
 		} catch (error) {
 			console.error("Error validating states:", error);
-			alert("Failed to validate state. Please try again.");
+			setAlertModal({
+				show: true,
+				variant: "error",
+				title: "Error",
+				message: "Failed to validate state. Please try again.",
+			});
 		}
 	};
 
@@ -710,6 +733,20 @@ export default function ReviewArticles() {
 				onToggleReviewed={handleClickIsReviewed}
 				onToggleRelevant={handleClickIsRelevant}
 			/>
+
+			{/* Alert Modal */}
+			<Modal
+				isOpen={alertModal.show}
+				onClose={() => setAlertModal({ ...alertModal, show: false })}
+				showCloseButton={true}
+			>
+				<ModalInformationOk
+					title={alertModal.title}
+					message={alertModal.message}
+					variant={alertModal.variant}
+					onClose={() => setAlertModal({ ...alertModal, show: false })}
+				/>
+			</Modal>
 		</div>
 	);
 }
