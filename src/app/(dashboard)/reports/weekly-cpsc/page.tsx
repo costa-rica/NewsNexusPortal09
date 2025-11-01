@@ -63,6 +63,8 @@ export default function WeeklyCpsc() {
 	});
 	const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
 	const [reportToDelete, setReportToDelete] = useState<Report | null>(null);
+	const [showCreateReportConfirmModal, setShowCreateReportConfirmModal] =
+		useState(false);
 
 	const fetchApprovedArticlesArray = useCallback(async () => {
 		setIsLoadingApprovedArticles(true);
@@ -186,15 +188,12 @@ export default function WeeklyCpsc() {
 	};
 
 	// Create report with staged articles
-	const handleCreateReport = async () => {
-		if (
-			!window.confirm(
-				"This will create a report with all the staged articles. Continue?"
-			)
-		) {
-			return;
-		}
+	const handleCreateReport = () => {
+		setShowCreateReportConfirmModal(true);
+	};
 
+	const confirmCreateReport = async () => {
+		setShowCreateReportConfirmModal(false);
 		setIsCreatingReport(true);
 		setLoadingReports(true);
 		const articlesIdArrayForReport = approvedArticlesArray
@@ -645,6 +644,23 @@ export default function WeeklyCpsc() {
 					yesButtonText="Yes, Delete"
 					noButtonText="Cancel"
 					yesButtonStyle="danger"
+				/>
+			</Modal>
+
+			{/* Create Report Confirmation Modal */}
+			<Modal
+				isOpen={showCreateReportConfirmModal}
+				onClose={() => setShowCreateReportConfirmModal(false)}
+				showCloseButton={true}
+			>
+				<ModalInformationYesOrNo
+					title="Create Report?"
+					message="This will create a report with all the staged articles. Continue?"
+					onYes={confirmCreateReport}
+					onClose={() => setShowCreateReportConfirmModal(false)}
+					yesButtonText="Yes, Create Report"
+					noButtonText="Cancel"
+					yesButtonStyle="primary"
 				/>
 			</Modal>
 		</div>
