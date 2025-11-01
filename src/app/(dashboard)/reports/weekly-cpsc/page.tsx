@@ -10,6 +10,7 @@ import { Modal } from "@/components/ui/modal";
 import { ModalReportDateContent } from "@/components/ui/modal/ModalReportDateContent";
 import { ModalArticleReferenceNumberContent } from "@/components/ui/modal/ModalArticleReferenceNumberContent";
 import { ModalArticleRejectionStatus } from "@/components/ui/modal/ModalArticleRejectionStatus";
+import { ModalInformationOk } from "@/components/ui/modal/ModalInformationOk";
 import { LoadingDots } from "@/components/common/LoadingDots";
 
 interface Report {
@@ -48,6 +49,17 @@ export default function WeeklyCpsc() {
 		isOpenModalArticleRejectionStatus,
 		setIsOpenModalArticleRejectionStatus,
 	] = useState(false);
+	const [alertModal, setAlertModal] = useState<{
+		show: boolean;
+		variant: "success" | "error";
+		title: string;
+		message: string;
+	}>({
+		show: false,
+		variant: "success",
+		title: "",
+		message: "",
+	});
 
 	const fetchApprovedArticlesArray = useCallback(async () => {
 		setIsLoadingApprovedArticles(true);
@@ -207,15 +219,30 @@ export default function WeeklyCpsc() {
 			const resJson = await response.json();
 
 			if (resJson?.error) {
-				alert(`Error Creating Report: ${resJson.error}`);
+				setAlertModal({
+					show: true,
+					variant: "error",
+					title: "Error Creating Report",
+					message: resJson.error,
+				});
 			} else {
-				alert("Report created successfully!");
+				setAlertModal({
+					show: true,
+					variant: "success",
+					title: "Success",
+					message: "Report created successfully!",
+				});
 			}
 
 			fetchReportsArray();
 		} catch (error) {
 			console.error("Error creating report:", error);
-			alert("Error creating report. Please try again.");
+			setAlertModal({
+				show: true,
+				variant: "error",
+				title: "Error",
+				message: "Error creating report. Please try again.",
+			});
 		} finally {
 			setLoadingReports(false);
 			setIsCreatingReport(false);
@@ -250,12 +277,22 @@ export default function WeeklyCpsc() {
 				throw new Error(`Server Error: ${errorText}`);
 			}
 
-			alert("Report date updated successfully!");
+			setAlertModal({
+				show: true,
+				variant: "success",
+				title: "Success",
+				message: "Report date updated successfully!",
+			});
 			setIsOpenModalReportDate(false);
 			fetchReportsArray();
 		} catch (error) {
 			console.error("Error updating report date:", error);
-			alert("Error updating report date. Please try again.");
+			setAlertModal({
+				show: true,
+				variant: "error",
+				title: "Error",
+				message: "Error updating report date. Please try again.",
+			});
 		}
 	};
 
@@ -299,7 +336,12 @@ export default function WeeklyCpsc() {
 			window.URL.revokeObjectURL(url);
 		} catch (error) {
 			console.error("Error downloading report:", error);
-			alert("Error downloading report. Please try again.");
+			setAlertModal({
+				show: true,
+				variant: "error",
+				title: "Error",
+				message: "Error downloading report. Please try again.",
+			});
 		}
 	};
 
@@ -325,15 +367,23 @@ export default function WeeklyCpsc() {
 			const resJson = await response.json();
 
 			// Show success message with details
-			alert(
-				`Report ID ${resJson.newReportId} successfully created. This is an updated version of the Report ID ${resJson.originalReportId} submitted on ${resJson.originalReportSubmittedDate}.`
-			);
+			setAlertModal({
+				show: true,
+				variant: "success",
+				title: "Success",
+				message: `Report ID ${resJson.newReportId} successfully created. This is an updated version of the Report ID ${resJson.originalReportId} submitted on ${resJson.originalReportSubmittedDate}.`,
+			});
 
 			// Refresh the reports list
 			fetchReportsArray();
 		} catch (error) {
 			console.error("Error recreating report:", error);
-			alert("Error recreating report. Please try again.");
+			setAlertModal({
+				show: true,
+				variant: "error",
+				title: "Error",
+				message: "Error recreating report. Please try again.",
+			});
 		} finally {
 			setLoadingReports(false);
 		}
@@ -366,13 +416,23 @@ export default function WeeklyCpsc() {
 				throw new Error(`Server Error: ${errorText}`);
 			}
 
-			alert("Report deleted successfully!");
+			setAlertModal({
+				show: true,
+				variant: "success",
+				title: "Success",
+				message: "Report deleted successfully!",
+			});
 
 			// Refresh the reports list
 			fetchReportsArray();
 		} catch (error) {
 			console.error("Error deleting report:", error);
-			alert("Error deleting report. Please try again.");
+			setAlertModal({
+				show: true,
+				variant: "error",
+				title: "Error",
+				message: "Error deleting report. Please try again.",
+			});
 		}
 	};
 
@@ -550,6 +610,20 @@ export default function WeeklyCpsc() {
 				<div className="p-12">
 					<LoadingDots size={4} />
 				</div>
+			</Modal>
+
+			{/* Alert Modal */}
+			<Modal
+				isOpen={alertModal.show}
+				onClose={() => setAlertModal({ ...alertModal, show: false })}
+				showCloseButton={true}
+			>
+				<ModalInformationOk
+					title={alertModal.title}
+					message={alertModal.message}
+					variant={alertModal.variant}
+					onClose={() => setAlertModal({ ...alertModal, show: false })}
+				/>
 			</Modal>
 		</div>
 	);
