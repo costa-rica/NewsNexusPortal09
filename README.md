@@ -79,6 +79,16 @@ The goal of NewsNexusPortal09 is to faithfully re-create and enhance the functio
 └── tsconfig.json
 ```
 
+## .env
+```
+NEXT_PUBLIC_API_BASE_URL=https://api.news-nexus.kineticmetrics.com
+NEXT_PUBLIC_API_BASE_URL_DEV=https://api.news-nexus-dev.kineticmetrics.com
+NEXT_PUBLIC_API_BASE_URL_WORKSTATION=http://localhost:3000
+NEXT_PUBLIC_APP_NAME=NewsNexus
+NEXT_PUBLIC_MODE=dev
+```
+
+
 ## Key differences from version 08
 
 - **Layout vs `TemplateView.js`**: In v08 (Pages Router) we used a `TemplateView.js` component to render the top/side navigation across pages. In v09 (App Router), this responsibility moves to `layout.tsx`.
