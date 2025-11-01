@@ -222,9 +222,21 @@ export default function ReviewArticles() {
 
 			const result = await response.json();
 			console.log("Content updated:", result);
-			// TODO: Show success message
+
+			setAlertModal({
+				show: true,
+				variant: "success",
+				title: "Success",
+				message: "Article content successfully updated!",
+			});
 		} catch (error) {
 			console.error("Error updating content:", error);
+			setAlertModal({
+				show: true,
+				variant: "error",
+				title: "Error",
+				message: "Failed to update article content. Please try again.",
+			});
 		}
 	};
 
