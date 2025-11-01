@@ -9,6 +9,7 @@ import TableDuplicateAnalysis, {
 } from "@/components/tables/TableDuplicateAnalysis";
 import { Modal } from "@/components/ui/modal";
 import { ModalInformationYesOrNo } from "@/components/ui/modal/ModalInformationYesOrNo";
+import { ModalInformationOk } from "@/components/ui/modal/ModalInformationOk";
 
 interface JobListStatusResponse {
 	jobs: Array<{
@@ -45,6 +46,17 @@ export default function ApprovedArticleDuplicate() {
 		useState(false);
 	const [isCreatingAnalysis, setIsCreatingAnalysis] = useState(false);
 	const [showConfirmModal, setShowConfirmModal] = useState(false);
+	const [alertModal, setAlertModal] = useState<{
+		show: boolean;
+		variant: "success" | "error";
+		title: string;
+		message: string;
+	}>({
+		show: false,
+		variant: "success",
+		title: "",
+		message: "",
+	});
 
 	// Fetch job list status
 	const fetchJobListStatus = useCallback(async () => {
@@ -250,12 +262,21 @@ export default function ApprovedArticleDuplicate() {
 
 			// Note: The actual analysis creation happens on the backend
 			// User will need to refresh or check back later for the table
-			alert(
-				"Duplicate analysis has been initiated. Refresh the page to see results."
-			);
+			setAlertModal({
+				show: true,
+				variant: "success",
+				title: "Analysis Initiated",
+				message:
+					"Duplicate analysis has been initiated. Refresh the page to see results.",
+			});
 		} catch (error) {
 			console.error("Error running duplicate analysis:", error);
-			alert("Error initiating duplicate analysis. Please try again.");
+			setAlertModal({
+				show: true,
+				variant: "error",
+				title: "Error",
+				message: "Error initiating duplicate analysis. Please try again.",
+			});
 			setIsCreatingAnalysis(false);
 		}
 	};
@@ -478,6 +499,24 @@ export default function ApprovedArticleDuplicate() {
 					yesButtonText="Yes, Run Analysis"
 					noButtonText="Cancel"
 					yesButtonStyle="danger"
+				/>
+			</Modal>
+
+			{/* Alert Modal */}
+			<Modal
+				isOpen={alertModal.show}
+				onClose={() =>
+					setAlertModal({ ...alertModal, show: false })
+				}
+				showCloseButton={true}
+			>
+				<ModalInformationOk
+					title={alertModal.title}
+					message={alertModal.message}
+					variant={alertModal.variant}
+					onClose={() =>
+						setAlertModal({ ...alertModal, show: false })
+					}
 				/>
 			</Modal>
 		</div>
