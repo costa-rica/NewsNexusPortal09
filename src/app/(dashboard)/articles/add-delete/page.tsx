@@ -6,6 +6,7 @@ import { SummaryStatistics } from "@/components/common/SummaryStatistics";
 import TableReviewArticles from "@/components/tables/TableReviewArticles";
 import MultiSelect from "@/components/form/MultiSelect";
 import { Modal } from "@/components/ui/modal";
+import { ModalInformationOk } from "@/components/ui/modal/ModalInformationOk";
 import type { Article } from "@/types/article";
 
 interface State {
@@ -41,6 +42,17 @@ export default function AddDeleteArticle() {
 		content: false,
 	});
 	const [loadingTable, setLoadingTable] = useState(false);
+	const [alertModal, setAlertModal] = useState<{
+		show: boolean;
+		variant: "success" | "error" | "warning";
+		title: string;
+		message: string;
+	}>({
+		show: false,
+		variant: "success",
+		title: "",
+		message: "",
+	});
 
 	const updateStateArrayWithArticleState = useCallback((article: { States?: State[] }) => {
 		if (!article?.States) {
@@ -123,14 +135,23 @@ export default function AddDeleteArticle() {
 			!newArticle.publishedDate ||
 			!newArticle.content
 		) {
-			alert(
-				"Please fill in all required fields: publication name, title, published date, content"
-			);
+			setAlertModal({
+				show: true,
+				variant: "warning",
+				title: "Missing Required Fields",
+				message:
+					"Please fill in all required fields: publication name, title, published date, content",
+			});
 			return;
 		}
 
 		if (selectedStateObjs.length === 0) {
-			alert("Please select at least one state");
+			setAlertModal({
+				show: true,
+				variant: "warning",
+				title: "State Required",
+				message: "Please select at least one state",
+			});
 			return;
 		}
 
@@ -157,10 +178,20 @@ export default function AddDeleteArticle() {
 			const resJson = await response.json();
 
 			if (response.status === 400) {
-				alert(resJson.message);
+				setAlertModal({
+					show: true,
+					variant: "error",
+					title: "Error",
+					message: resJson.message,
+				});
 				return;
 			} else {
-				alert("Successfully added article");
+				setAlertModal({
+					show: true,
+					variant: "success",
+					title: "Success",
+					message: "Successfully added article",
+				});
 				const blankArticle = {
 					publicationName: "",
 					title: "",
@@ -250,7 +281,12 @@ export default function AddDeleteArticle() {
 			setSelectedArticle(null);
 			setNewArticle({});
 			updateStateArrayWithArticleState({ States: [] });
-			alert("Article deleted successfully!");
+			setAlertModal({
+				show: true,
+				variant: "success",
+				title: "Success",
+				message: "Article deleted successfully!",
+			});
 		} catch (error) {
 			console.error("Error deleting article:", error);
 		} finally {
@@ -483,6 +519,20 @@ export default function AddDeleteArticle() {
 					</div>
 				</Modal>
 			)}
+
+			{/* Alert Modal */}
+			<Modal
+				isOpen={alertModal.show}
+				onClose={() => setAlertModal({ ...alertModal, show: false })}
+				showCloseButton={true}
+			>
+				<ModalInformationOk
+					title={alertModal.title}
+					message={alertModal.message}
+					variant={alertModal.variant}
+					onClose={() => setAlertModal({ ...alertModal, show: false })}
+				/>
+			</Modal>
 		</div>
 	);
 }
