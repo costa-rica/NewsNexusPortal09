@@ -69,6 +69,7 @@ const othersItems: NavItem[] = [
 		icon: <DatabaseIcon />,
 		name: "Database",
 		subItems: [
+			{ name: "Main", path: "/admin-database/main", pro: false },
 			{ name: "Backup", path: "/admin-database/backup", pro: false },
 			{ name: "Upload", path: "/admin-database/upload", pro: false },
 			{ name: "Delete", path: "/admin-database/delete", pro: false },
