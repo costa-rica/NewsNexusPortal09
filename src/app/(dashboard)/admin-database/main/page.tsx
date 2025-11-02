@@ -267,9 +267,9 @@ export default function AdminDatabaseMain() {
 		});
 
 		// Only include delete column if not a dummy row
-		return isDummyRow
+		return (isDummyRow
 			? [idColumn, ...dynamicCols]
-			: [idColumn, ...dynamicCols, deleteColumn];
+			: [idColumn, ...dynamicCols, deleteColumn]) as ColumnDef<TableRow, unknown>[];
 	}, [tableData, tableKeys, handleSelectRow]);
 
 	return (
