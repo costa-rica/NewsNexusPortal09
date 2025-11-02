@@ -310,8 +310,10 @@ export default function AdminDatabaseMain() {
 				) : (
 					<>
 						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-							{tableKeys.map((key) => (
-								<div key={key} className="flex flex-col gap-2">
+							{tableKeys
+								.filter((key) => key !== "createdAt" && key !== "updatedAt")
+								.map((key) => (
+									<div key={key} className="flex flex-col gap-2">
 									<label className="text-sm font-medium text-gray-700 dark:text-gray-300">
 										{key}
 									</label>
