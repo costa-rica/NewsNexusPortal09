@@ -293,6 +293,9 @@ export default function AdminDatabaseMain() {
 						<option value="ArtificialIntelligence">
 							ArtificialIntelligence
 						</option>
+						<option value="EntityWhoCategorizedArticle">
+							EntityWhoCategorizedArticle
+						</option>
 					</select>
 				</div>
 			</div>
