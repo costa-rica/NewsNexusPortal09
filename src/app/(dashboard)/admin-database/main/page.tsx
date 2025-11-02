@@ -12,13 +12,11 @@ interface TableRow {
 	[key: string]: unknown;
 }
 
-const HIDDEN_COLUMNS = ["createdAt", "updatedAt"];
-
 export default function AdminDatabaseMain() {
 	const { token } = useAppSelector((state) => state.user);
 	const [selectedTable, setSelectedTable] = useState<string>("User");
 	const [tableData, setTableData] = useState<TableRow[]>([]);
-	const [visibleKeys, setVisibleKeys] = useState<string[]>([]);
+	const [tableKeys, setTableKeys] = useState<string[]>([]);
 	const [selectedId, setSelectedId] = useState<number | null>(null);
 	const [selectedRow, setSelectedRow] = useState<Record<string, unknown>>({});
 	const [loading, setLoading] = useState(false);
@@ -35,13 +33,12 @@ export default function AdminDatabaseMain() {
 		message: "",
 	});
 
-	// Extract visible keys from table data
+	// Extract all column keys from table data (except id)
 	useEffect(() => {
 		if (tableData.length === 0) return;
 
 		const allKeys = Object.keys(tableData[0]).filter((key) => key !== "id");
-		const visible = allKeys.filter((key) => !HIDDEN_COLUMNS.includes(key));
-		setVisibleKeys(visible);
+		setTableKeys(allKeys);
 	}, [tableData]);
 
 	const fetchTableData = useCallback(async (tableName: string) => {
@@ -204,9 +201,9 @@ export default function AdminDatabaseMain() {
 		return key.startsWith("is") || key.startsWith("processing");
 	};
 
-	// Build dynamic columns based on visible keys
+	// Build dynamic columns based on table keys
 	const columns = useMemo<ColumnDef<TableRow, unknown>[]>(() => {
-		if (tableData.length === 0 || visibleKeys.length === 0) return [];
+		if (tableData.length === 0 || tableKeys.length === 0) return [];
 
 		const columnHelper = createColumnHelper<TableRow>();
 
@@ -227,8 +224,8 @@ export default function AdminDatabaseMain() {
 			),
 		});
 
-		// Dynamic columns based on visible keys
-		const dynamicCols = visibleKeys.map((key) => {
+		// Dynamic columns based on table keys
+		const dynamicCols = tableKeys.map((key) => {
 			return columnHelper.accessor(
 				(row) => row[key],
 				{
@@ -273,7 +270,7 @@ export default function AdminDatabaseMain() {
 		return isDummyRow
 			? [idColumn, ...dynamicCols]
 			: [idColumn, ...dynamicCols, deleteColumn];
-	}, [tableData, visibleKeys, handleSelectRow]);
+	}, [tableData, tableKeys, handleSelectRow]);
 
 	return (
 		<div className="flex flex-col gap-4 md:gap-6">
@@ -306,14 +303,14 @@ export default function AdminDatabaseMain() {
 					{selectedId ? `Update Row (ID: ${selectedId})` : "Add New Row"}
 				</h2>
 
-				{visibleKeys.length === 0 ? (
+				{tableKeys.length === 0 ? (
 					<p className="text-gray-500 dark:text-gray-400">
 						{loading ? "Loading..." : "No data available"}
 					</p>
 				) : (
 					<>
 						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-							{visibleKeys.map((key) => (
+							{tableKeys.map((key) => (
 								<div key={key} className="flex flex-col gap-2">
 									<label className="text-sm font-medium text-gray-700 dark:text-gray-300">
 										{key}
