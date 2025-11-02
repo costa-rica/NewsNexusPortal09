@@ -2,9 +2,10 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useAppSelector } from "@/store/hooks";
 import TableRowCounts, { RowCount } from "@/components/tables/TableRowCounts";
+import AccessRestricted from "@/components/common/AccessRestricted";
 
 export default function DatabaseUpload() {
-	const { token } = useAppSelector((state) => state.user);
+	const { token, isAdmin } = useAppSelector((state) => state.user);
 	const [arrayRowCountsByTable, setArrayRowCountsByTable] = useState<
 		RowCount[]
 	>([]);
@@ -39,6 +40,11 @@ export default function DatabaseUpload() {
 	useEffect(() => {
 		fetchRowCountsByTable();
 	}, [fetchRowCountsByTable]);
+
+	// Check admin access
+	if (!isAdmin) {
+		return <AccessRestricted />;
+	}
 
 	const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const selectedFile = e.target.files?.[0];

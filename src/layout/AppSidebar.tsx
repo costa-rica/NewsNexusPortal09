@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState, useCallback } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useSidebar } from "../context/SidebarContext";
-import { useAppDispatch } from "../store/hooks";
+import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { logoutUserFully } from "../store/features/user/userSlice";
 import {
 	ChevronDownIcon,
@@ -83,6 +83,7 @@ const AppSidebar: React.FC = () => {
 	const pathname = usePathname();
 	const router = useRouter();
 	const dispatch = useAppDispatch();
+	const { isAdmin } = useAppSelector((state) => state.user);
 
 	const handleLogout = () => {
 		dispatch(logoutUserFully());
@@ -337,16 +338,18 @@ const AppSidebar: React.FC = () => {
 							{renderMenuItems(navItems, "main")}
 						</div>
 
-						<div className="">
-							<h2
-								className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${
-									!isExpanded ? "lg:justify-center" : "justify-start"
-								}`}
-							>
-								{isExpanded || isMobileOpen ? "Admin" : <HorizontaLDots />}
-							</h2>
-							{renderMenuItems(othersItems, "others")}
-						</div>
+						{isAdmin && (
+							<div className="">
+								<h2
+									className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${
+										!isExpanded ? "lg:justify-center" : "justify-start"
+									}`}
+								>
+									{isExpanded || isMobileOpen ? "Admin" : <HorizontaLDots />}
+								</h2>
+								{renderMenuItems(othersItems, "others")}
+							</div>
+						)}
 					</div>
 				</nav>
 				{isExpanded || isMobileOpen ? <SidebarWidget /> : null}

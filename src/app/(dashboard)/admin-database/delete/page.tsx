@@ -4,6 +4,7 @@ import { useAppSelector } from "@/store/hooks";
 import { Modal } from "@/components/ui/modal";
 import { ModalInformationYesOrNo } from "@/components/ui/modal/ModalInformationYesOrNo";
 import { ModalInformationOk } from "@/components/ui/modal/ModalInformationOk";
+import AccessRestricted from "@/components/common/AccessRestricted";
 
 interface TableRowCount {
 	tableName: string;
@@ -22,7 +23,7 @@ const PROTECTED_TABLES = [
 ];
 
 export default function DatabaseDelete() {
-	const { token } = useAppSelector((state) => state.user);
+	const { token, isAdmin } = useAppSelector((state) => state.user);
 	const [arrayRowCountsByTable, setArrayRowCountsByTable] = useState<
 		TableRowCount[]
 	>([]);
@@ -85,6 +86,11 @@ export default function DatabaseDelete() {
 	useEffect(() => {
 		fetchRowCountsByTable();
 	}, [fetchRowCountsByTable]);
+
+	// Check admin access
+	if (!isAdmin) {
+		return <AccessRestricted />;
+	}
 
 	const handleConfirmDelete = (tableName: string) => {
 		setSelectedTable(tableName);

@@ -6,6 +6,7 @@ import { ModalInformationYesOrNo } from "@/components/ui/modal/ModalInformationY
 import { ModalInformationOk } from "@/components/ui/modal/ModalInformationOk";
 import TableAdminDatabaseMain from "@/components/tables/TableAdminDatabaseMain";
 import { createColumnHelper, ColumnDef } from "@tanstack/react-table";
+import AccessRestricted from "@/components/common/AccessRestricted";
 
 interface TableRow {
 	id: number | null;
@@ -13,7 +14,7 @@ interface TableRow {
 }
 
 export default function AdminDatabaseMain() {
-	const { token } = useAppSelector((state) => state.user);
+	const { token, isAdmin } = useAppSelector((state) => state.user);
 	const [selectedTable, setSelectedTable] = useState<string>("User");
 	const [tableData, setTableData] = useState<TableRow[]>([]);
 	const [tableKeys, setTableKeys] = useState<string[]>([]);
@@ -271,6 +272,11 @@ export default function AdminDatabaseMain() {
 			? [idColumn, ...dynamicCols]
 			: [idColumn, ...dynamicCols, deleteColumn]) as ColumnDef<TableRow, unknown>[];
 	}, [tableData, tableKeys, handleSelectRow]);
+
+	// Check admin access
+	if (!isAdmin) {
+		return <AccessRestricted />;
+	}
 
 	return (
 		<div className="flex flex-col gap-4 md:gap-6">
