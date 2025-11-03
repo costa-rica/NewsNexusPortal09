@@ -6,7 +6,7 @@ import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
 import { loginUser } from "../../reducers/user";
 
-export default function Login() {
+export default function Register() {
   const [email, emailSetter] = useState("");
   const [password, passwordSetter] = useState("");
   const dispatch = useDispatch();
@@ -52,13 +52,9 @@ export default function Login() {
     }
 
     if (response.ok) {
-      // if (resJson.user.isAdminForKvManagerWebsite) {
       resJson.email = email;
       dispatch(loginUser(resJson));
       router.push("/articles/review");
-      // } else {
-      //   alert("You are not authorized to login.");
-      // }
     } else {
       const errorMessage =
         resJson?.error || `There was a server error: ${response.status}`;
