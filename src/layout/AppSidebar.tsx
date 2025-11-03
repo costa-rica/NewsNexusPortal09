@@ -34,6 +34,7 @@ const navItems: NavItem[] = [
 		subItems: [
 			{ name: "Review", path: "/articles/review", pro: false },
 			{ name: "Add / Delete", path: "/articles/add-delete", pro: false },
+			{ name: "Automation & Browser Extension", path: "/articles/automation", pro: false },
 		],
 	},
 	{
