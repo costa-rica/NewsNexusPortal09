@@ -10,20 +10,12 @@ import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { useRouter } from "next/navigation";
 import { loginUser, updateStateArray } from "@/store/features/user/userSlice";
 
-// export default function SignInForm() {
-export default function LoginForm() {
+export default function RegisterForm() {
 	const [showPassword, setShowPassword] = useState(false);
-	const [email, emailSetter] = useState(
-		process.env.NEXT_PUBLIC_MODE === "workstation"
-			? "nickrodriguez@kineticmetrics.com"
-			: ""
-	);
-	const [password, passwordSetter] = useState(
-		process.env.NEXT_PUBLIC_MODE === "workstation" ? "test" : ""
-	);
+	const [email, emailSetter] = useState("");
+	const [password, passwordSetter] = useState("");
 	const dispatch = useAppDispatch();
 	const router = useRouter();
-	// const userReducer = useSelector((state) => state.user);
 	const userReducer = useAppSelector((s) => s.user);
 
 	const fetchStateArray = useCallback(async () => {
@@ -70,18 +62,18 @@ export default function LoginForm() {
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [fetchStateArray, userReducer.token, router]);
 
-	const handleClickLogin = async () => {
+	const handleClickRegister = async () => {
 		console.log(
-			"Login ---> API URL:",
-			`${process.env.NEXT_PUBLIC_API_BASE_URL}/users/login`
+			"Register ---> API URL:",
+			`${process.env.NEXT_PUBLIC_API_BASE_URL}/users/register`
 		);
-		console.log("- handleClickLogin 👀");
+		console.log("- handleClickRegister 👀");
 		console.log("- email:", email);
 
 		const bodyObj = { email, password };
 
 		const response = await fetch(
-			`${process.env.NEXT_PUBLIC_API_BASE_URL}/users/login`,
+			`${process.env.NEXT_PUBLIC_API_BASE_URL}/users/register`,
 			{
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
@@ -99,15 +91,14 @@ export default function LoginForm() {
 		}
 
 		if (response.ok) {
-			// if (resJson.user.isAdminForKvManagerWebsite) {
 			console.log(resJson);
 			resJson.email = email;
 			try {
 				dispatch(loginUser(resJson));
 				router.push("/articles/review");
 			} catch (error) {
-				console.error("Error logging in:", error);
-				alert("Error logging in");
+				console.error("Error registering:", error);
+				alert("Error registering");
 			}
 		} else {
 			const errorMessage =
@@ -122,7 +113,7 @@ export default function LoginForm() {
 				<div className="flex flex-col justify-center px-6 lg:px-12 w-full h-full">
 					<div className="mb-5 sm:mb-8">
 						<h1 className="mb-2 font-semibold text-gray-800 text-title-sm dark:text-white/90 sm:text-title-md">
-							Sign In
+							Register
 						</h1>
 					</div>
 					<div>
@@ -133,7 +124,7 @@ export default function LoginForm() {
 										Email <span className="text-error-500">*</span>{" "}
 									</Label>
 									<Input
-										placeholder="info@gmail.com"
+										placeholder="example@gmail.com"
 										type="email"
 										value={email}
 										onChange={(e) => emailSetter(e.target.value)}
@@ -162,28 +153,18 @@ export default function LoginForm() {
 										</span>
 									</div>
 								</div>
-								<div className="flex items-center justify-end">
-									<Link
-										href="/forgot-password"
-										className="text-sm text-brand-500 hover:text-brand-600 dark:text-brand-400"
-									>
-										Forgot password?
-									</Link>
-								</div>
 								<div>
 									<Button
 										type="button"
 										className="w-full"
 										size="sm"
-										// onClick={handleClickLogin}
 										onClick={() => {
 											console.log("Submitted email:", email);
 											console.log("Submitted password:", password);
-											handleClickLogin();
-											// You can call your submit logic or dispatch here
+											handleClickRegister();
 										}}
 									>
-										Sign in
+										Register
 									</Button>
 								</div>
 							</div>
@@ -191,12 +172,12 @@ export default function LoginForm() {
 
 						<div className="mt-5">
 							<p className="text-sm font-normal text-center text-gray-700 dark:text-gray-400 sm:text-start">
-								Don&apos;t have an account? {""}
+								Already registered? {""}
 								<Link
-									href="/register"
+									href="/login"
 									className="text-brand-500 hover:text-brand-600 dark:text-brand-400"
 								>
-									Register
+									Login
 								</Link>
 							</p>
 						</div>

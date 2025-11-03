@@ -1,12 +1,11 @@
-import RegistrationForm from "@/components/auth/RegistrationForm";
+import RegisterForm from "@/components/auth/RegisterForm";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-	title: "Next.js SignUp Page | TailAdmin - Next.js Dashboard Template",
-	description: "This is Next.js SignUp Page TailAdmin Dashboard Template",
-	// other metadata
+	title: "Register | NewsNexus Portal",
+	description: "Register for a new NewsNexus account",
 };
 
-export default function SignUp() {
-	return <RegistrationForm />;
+export default function Register() {
+	return <RegisterForm />;
 }
